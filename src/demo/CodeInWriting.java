@@ -25,6 +25,8 @@ public class CodeInWriting {
 	
 	private static Set<String> keyWord = new HashSet<>();
 	
+	
+	private static StringBuilder requestText;
 	private static int tapLev = 2;
 	
     public static void main(String[] args) {
@@ -35,7 +37,7 @@ public class CodeInWriting {
         String accessKey = "";
         String analysisCode = "srl";        
         
-        StringBuilder requestText = new StringBuilder();
+       requestText = new StringBuilder();
 //        text.append("안녕 세계를 출력하세요");
         requestText.append("그럴 겨를이 없다를 출력하세요. 오뎅을 출력 하는 것을 스물두 번 반복하세요. 바나나를 출력하세요");
 //        text.append("안녕 안녕 안녕 세상아 세상아 안녕");
@@ -122,8 +124,9 @@ public class CodeInWriting {
                     double id = (double) morpheme.get("id");
                 	String lemma = (String) morpheme.get("lemma");
                     String type = (String) morpheme.get("type");
+                    double position = (double) morpheme.get("position");
                     
-                    morpList.add(new Morpheme(id, lemma, type));
+                    morpList.add(new Morpheme(id, lemma, type, position));
                 }
                 
                 List<Dependency> dependencyList = new ArrayList<>();
@@ -149,7 +152,11 @@ public class CodeInWriting {
             
             showProcessingSentence(sentenceInfoList);
 
-            buildCode(sentenceInfoList);
+            int beforeSentenceLength = 0;
+            for(Map<String, Object> sentenceInfo : sentenceInfoList) {
+            	beforeSentenceLength += prepareToCode(sentenceInfo, beforeSentenceLength);
+            }
+//            buildCode(sentenceInfoList);
             
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -301,7 +308,7 @@ public class CodeInWriting {
         System.out.println(finalCode);
     }
     
-    private static Map<String, Object> prepareToCode(Map<String, Object> sentenceInfo) {
+    private static int prepareToCode(Map<String, Object> sentenceInfo, int beforeSentenceLength) {
 
     	Map<String, Object> prepareToCodeInfo = new HashMap<>();
     	
@@ -309,8 +316,9 @@ public class CodeInWriting {
     	
         StringBuilder sentenceText = new StringBuilder().append((String) sentenceInfo.get("text"));
         
-        List<Morpheme> morpList = (List<Morpheme>) sentenceInfo.get("morpList");
+        boolean cutTarget = true;
         
+        List<Morpheme> morpList = (List<Morpheme>) sentenceInfo.get("morpList");
         for(int i=0; i<morpList.size(); i++) {
         	Morpheme morpheme = morpList.get(i);
         	
@@ -319,14 +327,14 @@ public class CodeInWriting {
 				continue;
 			}
 			
-			if(morpheme.type.equals("JKO")) {
+			if(morpheme.type.equals("JKO")&&cutTarget) {
 				
 			}
 		}
 		
         prepareToCodeInfo.put("keyWordList", keyWordList);
         
-        return prepareToCodeInfo;
+        return sentenceText.toString().getBytes().length;
     }
     
     private static void showProcessingSentence(List<Map<String, Object>> sentenceInfoList) {
@@ -336,7 +344,7 @@ public class CodeInWriting {
         	System.out.println("morp ->");
         	List<Morpheme> morpList = (List<Morpheme>) sentenceInfo.get("morpList");
         	for(Morpheme morp : morpList) {
-        		System.out.print("(" + morp.id + ")"+ morp.text + "/" + morp.type + " ");
+        		System.out.print("(" + morp.id + "/" + morp.position + ")"+ morp.text + "/" + morp.type + " ");
         	}
         	
         	System.out.println();
