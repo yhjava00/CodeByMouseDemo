@@ -1,4 +1,4 @@
-package demo;
+package test;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -18,11 +18,41 @@ import java.util.Set;
 
 import com.google.gson.Gson;
 
-import vo.Dependency;
-import vo.Morpheme;
-
-public class CodeInWriting {
+public class CodeInWritingCopy {
+	static public class Morpheme {
+		final double id;
+		final String text;
+        final String type;
+        public Morpheme (double id, String text, String type) {
+            this.id = id;
+        	this.text = text;
+            this.type = type;
+        }
+        @Override
+        public String toString() {
+        	return text;
+        }
+    }
 	
+	static public class Dependency {
+		final double id;
+		final String text;
+		final double head;
+		final String label;
+		final List<Double> mod;
+		public Dependency(double id, String text, double head, String label, List<Double> mod) {
+			this.id = id;
+			this.text = text;
+			this.head = head;
+			this.label = label;
+			this.mod = mod;
+		}
+		@Override
+        public String toString() {
+        	return text;
+        }
+	}
+
 	private static Set<String> keyWord = new HashSet<>();
 	
 	private static int tapLev = 2;
@@ -33,11 +63,11 @@ public class CodeInWriting {
     	
         String openApiURL = "http://aiopen.etri.re.kr:8000/WiseNLU";         
         String accessKey = "";
-        String analysisCode = "srl";        
+        String analysisCode = "srl";
         
         StringBuilder requestText = new StringBuilder();
 //        text.append("안녕 세계를 출력하세요");
-        requestText.append("그럴 겨를이 없다를 출력하세요. 오뎅을 출력 하는 것을 스물두 번 반복하세요. 바나나를 출력하세요");
+        requestText.append("안녕하세요 세계를 출력하세요. 오뎅을 출력 하는 것을 스물두 번 반복하세요. 바나나를 출력하세요");
 //        text.append("안녕 안녕 안녕 세상아 세상아 안녕");
         
         Gson gson = new Gson();
@@ -252,7 +282,7 @@ public class CodeInWriting {
     		}
     	}
     	
-    	end = text.lastIndexOf(words.get(endWordIdx).toString());
+    	end = text.indexOf(words.get(endWordIdx).toString());
 
     	print.append("System.out.println(\"").append(text.substring(start, end).trim()).append("\");\n");
     	
@@ -301,32 +331,8 @@ public class CodeInWriting {
         System.out.println(finalCode);
     }
     
-    private static Map<String, Object> prepareToCode(Map<String, Object> sentenceInfo) {
-
-    	Map<String, Object> prepareToCodeInfo = new HashMap<>();
+    private static void prepareToCode(Map<String, Object> sentenceInfo) {
     	
-    	List<String> keyWordList = new ArrayList<>();
-    	
-        StringBuilder sentenceText = new StringBuilder().append((String) sentenceInfo.get("text"));
-        
-        List<Morpheme> morpList = (List<Morpheme>) sentenceInfo.get("morpList");
-        
-        for(int i=0; i<morpList.size(); i++) {
-        	Morpheme morpheme = morpList.get(i);
-        	
-			if(keyWord.contains(morpheme.text)) {
-				keyWordList.add(morpheme.text);
-				continue;
-			}
-			
-			if(morpheme.type.equals("JKO")) {
-				
-			}
-		}
-		
-        prepareToCodeInfo.put("keyWordList", keyWordList);
-        
-        return prepareToCodeInfo;
     }
     
     private static void showProcessingSentence(List<Map<String, Object>> sentenceInfoList) {
