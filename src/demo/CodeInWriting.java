@@ -9,6 +9,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,28 +21,29 @@ import java.util.Set;
 import com.google.gson.Gson;
 
 import vo.Dependency;
+import vo.KeyWord;
 import vo.Morpheme;
+import vo.Variable;
 
 public class CodeInWriting {
 	
-	private static Set<String> keyWord = new HashSet<>();
-	
+	private static Map<String, Integer> keyWordSetMap = new HashMap<>();
+	private static Set<String> advanceCheckSet = new HashSet<>();
+	private static Map<String, Variable> variableMap = new HashMap<>();
 	
 	private static StringBuilder requestText;
-	private static int tapLev = 2;
-	
     public static void main(String[] args) {
 
-    	settingCodeInWriting();
+    	Setting.settingCodeInWriting(keyWordSetMap, advanceCheckSet, CodeCommend.convertToNumberMap);
     	
         String openApiURL = "http://aiopen.etri.re.kr:8000/WiseNLU";         
         String accessKey = "";
         String analysisCode = "srl";        
         
-       requestText = new StringBuilder();
-//        text.append("안녕 세계를 출력하세요");
-        requestText.append("그럴 겨를이 없다를 출력하세요. 오뎅을 출력 하는 것을 스물두 번 반복하세요. 바나나를 출력하세요");
-//        text.append("안녕 안녕 안녕 세상아 세상아 안녕");
+        requestText = new StringBuilder();
+        requestText.append("나를 찾아줘를 출력해줘.");
+//        requestText.append("정수형 변수 사과에 백을 담고. 정수형 변수 바나나에 이천을 담아서 정수형 변수 수박에 사과와 바나나를 더한 것을 담아주고. 바나나를 출력해줘.");
+
         
         Gson gson = new Gson();
         
@@ -88,7 +91,7 @@ public class CodeInWriting {
             // http 요청 오류 시 처리
             if ( responseCode != 200 ) {
                 // 오류 내용 출력
-                System.out.println("[error] " + responBodyJson);
+                System.out.println("[error http] " + responBodyJson);
                 return ;
             }
             
@@ -152,11 +155,7 @@ public class CodeInWriting {
             
             showProcessingSentence(sentenceInfoList);
 
-            int beforeSentenceLength = 0;
-            for(Map<String, Object> sentenceInfo : sentenceInfoList) {
-            	beforeSentenceLength += prepareToCode(sentenceInfo, beforeSentenceLength);
-            }
-//            buildCode(sentenceInfoList);
+            buildCode(sentenceInfoList);
             
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -165,132 +164,39 @@ public class CodeInWriting {
         }
     }
     
-    private static void codeFor(List<StringBuilder> code, List<Morpheme> words, int idx) {
-    	
-		int repeat = 0;
-		
-    	for(int i=idx-1; i>=0; i--) {
-    		Morpheme morpheme = words.get(i);
-    		if(morpheme.type.equals("NR")||morpheme.type.equals("MM")) {
-    			
-    			String repeatStr = morpheme.toString();
-    			
-    			if(i>0&&words.get(i-1).type.equals("NR")) {
-    				repeatStr = words.get(i-1).text + repeatStr;
-    			}
-    			
-    			repeat = convertToNumber(repeatStr);
-    			break;
-    		}
-    	}
-    	
-    	int size = code.size();
-    	
-    	code.add(size, buildLine().append("for(int i=0; i<").append(repeat).append("; i++) {\n"));
-    	tapLev++;
-    }
-    
-    private static Map<String, Integer> convertToNumberMap = new HashMap<>();  
-    
-    private static int convertToNumber(String num) {
-    	
-    	int result = 0;
-    	
-    	Integer n = 0;
-    	
-    	List<Integer> pieceOfNumbers = new ArrayList<>();
-    	
-    	for(int i=0; i<num.length(); i++) {
-    		
-    		String strNum = num.charAt(i) + "";
-    		
-    		if(convertToNumberMap.containsKey(strNum)) {
-    			n = convertToNumberMap.get(strNum);
-    		}else {
-    			try {
-    				strNum += num.charAt(++i);
-    				n = convertToNumberMap.get(strNum);
-				} catch (Exception e) {
-					n = 1;
-				}
-    		}
-    		
-    		if(n==null)
-    			continue;
-    		
-    		pieceOfNumbers.add(n);
-    	}
-    	
-    	int size = pieceOfNumbers.size();
-    	
-    	int pieceOfNumber = pieceOfNumbers.get(0);
-    	
-    	if(pieceOfNumber>9||(size==1)) {
-    		result = pieceOfNumber;
-    	}
-    	
-    	int undoPiece = pieceOfNumber;
-    	
-    	for(int i=1; i<size; i++) {
-    		pieceOfNumber = pieceOfNumbers.get(i);
-    		if(pieceOfNumber>9&&undoPiece<10) {
-    			result += pieceOfNumber * undoPiece;
-    		}else if(pieceOfNumber>9||i==size-1){
-    			result += pieceOfNumber;
-    		}
-    		undoPiece = pieceOfNumber;
-    		
-    	}
-    	
-    	return result;
-    }
-    
-    private static void codePrint(List<StringBuilder> code, List<Morpheme> words, int idx, StringBuilder text) {
-    	
-    	StringBuilder print = buildLine();
-    	
-    	int start=0, end=0, endWordIdx=0;
-
-    	for(int i=0; i<words.size(); i++) {
-    		Morpheme morpheme = words.get(i);
-    		if(morpheme.type.equals("JKO")) {
-    			endWordIdx = i;
-    			break;
-    		}
-    	}
-    	
-    	end = text.lastIndexOf(words.get(endWordIdx).toString());
-
-    	print.append("System.out.println(\"").append(text.substring(start, end).trim()).append("\");\n");
-    	
-    	code.add(print);
-    }
-    
     private static void buildCode(List<Map<String, Object>> sentenceInfoList) {
     	List<StringBuilder> code = new LinkedList<StringBuilder>();
         
     	code.add(new StringBuilder().append("public class Main {").append("\n"));
     	code.add(new StringBuilder().append("\tpublic static void main(String[] args) {").append("\n"));
     	
+    	int beforeSentenceLength = 0;
     	for(Map<String, Object> sentenceInfo : sentenceInfoList) {
-    		List<Morpheme> morpList = (List<Morpheme>) sentenceInfo.get("morpList");
-    		String text = (String) sentenceInfo.get("text");
+
+			code.add(CodeCommend.buildLine().append("\n"));
+			
+    		Map<String, Object> prepareToCodeInfo = prepareToCode(sentenceInfo, beforeSentenceLength);
     		
-    		for(int i=0; i<morpList.size(); i++) {
-    			if(keyWord.contains(morpList.get(i).toString())) {
-    				switch (morpList.get(i).text) {
-    				case "출력":
-    					codePrint(code, morpList, i, new StringBuilder().append(text));
-    					break;
-    				case "반복":
-    					codeFor(code, morpList, i);
-    					break;
-    				}
-    			}
+    		beforeSentenceLength += (int) prepareToCodeInfo.get("beforeSentenceLength");
+    		
+    		List<KeyWord> keyWordList = (List<KeyWord>) prepareToCodeInfo.get("keyWordList");
+    		
+    		for(KeyWord keyWord : keyWordList) {
+				switch (keyWord.text) {
+				case "변수":
+					CodeCommend.codeVariable(code, keyWord, variableMap.get(keyWord.info));
+					break;
+				case "출력":
+					CodeCommend.codePrint(code, keyWord);
+					break;
+				case "반복":
+					CodeCommend.codeFor(code, keyWord);
+					break;
+				}
     		}
-    		while(tapLev>2) {
-    			tapLev--;
-    			StringBuilder line = buildLine();
+    		while(CodeCommend.tapLev>2) {
+    			CodeCommend.tapLev--;
+    			StringBuilder line = CodeCommend.buildLine();
     			line.append("}\n");
     			code.add(line);
     		}
@@ -308,33 +214,110 @@ public class CodeInWriting {
         System.out.println(finalCode);
     }
     
-    private static int prepareToCode(Map<String, Object> sentenceInfo, int beforeSentenceLength) {
+    private static Map<String, Object> prepareToCode(Map<String, Object> sentenceInfo, int beforeSentenceLength) {
 
     	Map<String, Object> prepareToCodeInfo = new HashMap<>();
     	
-    	List<String> keyWordList = new ArrayList<>();
+    	List<KeyWord> keyWordList = new ArrayList<>();
     	
         StringBuilder sentenceText = new StringBuilder().append((String) sentenceInfo.get("text"));
-        
-        boolean cutTarget = true;
         
         List<Morpheme> morpList = (List<Morpheme>) sentenceInfo.get("morpList");
         for(int i=0; i<morpList.size(); i++) {
         	Morpheme morpheme = morpList.get(i);
         	
-			if(keyWord.contains(morpheme.text)) {
-				keyWordList.add(morpheme.text);
+			if(!keyWordSetMap.containsKey(morpheme.text))
 				continue;
-			}
 			
-			if(morpheme.type.equals("JKO")&&cutTarget) {
+			KeyWord keyWord = null;
+			
+			switch (morpheme.text) {
+			case "변수":
+				String variableName = morpList.get(i+1).text;
+				if(!variableMap.containsKey(variableName)) {
+					String variableType = morpList.get(i-2).text;
+					Morpheme startVariableValue = morpList.get(i+3);
+					Morpheme endVariableValue = null;
+					for(int j=i+4; j<morpList.size(); j++) {
+						endVariableValue = morpList.get(j);
+						if(endVariableValue.type.equals("JKO")&&morpList.get(j+1).text.equals("담")||morpList.get(j+1).text.equals("넣"))
+							break;
+					}
+					
+					String subWord = "";
+					int startCutIdx = 0;
+					do {
+						startCutIdx = sentenceText.indexOf(startVariableValue.text, startCutIdx+1);
+						subWord = sentenceText.substring(0, startCutIdx);
+					} while(startVariableValue.position!=subWord.getBytes().length+beforeSentenceLength);
+					
+					subWord = "";
+					int endCutIdx = 0;
+					do {
+						endCutIdx = sentenceText.indexOf(endVariableValue.text, endCutIdx+1);
+						subWord = sentenceText.substring(0, endCutIdx);
+					} while(endVariableValue.position!=subWord.getBytes().length+beforeSentenceLength);
+					
+					String variableValue = sentenceText.substring(startCutIdx, endCutIdx);
+					
+					variableMap.put(variableName, new Variable(variableType, variableName, variableValue.trim()));
+
+					keyWord = new KeyWord(morpheme.text, variableName, keyWordSetMap.get(morpheme.text));
+				}
 				
+				break;
+			case "출력":
+				Morpheme cutMorp = morpheme;
+
+				for(int j=i-1; j>=0; j--) {
+					cutMorp = morpList.get(j);
+					if(cutMorp.type.equals("JKO")) 
+						break;
+				}
+				
+				String cutWord = cutMorp.text;
+
+				String subWord = "";
+				int cutIdx = 0;
+				do {
+					cutIdx = sentenceText.indexOf(cutWord, cutIdx+1);
+					subWord = sentenceText.substring(0, cutIdx);
+				} while(cutMorp.position!=subWord.getBytes().length+beforeSentenceLength);
+
+				keyWord = new KeyWord(morpheme.text, subWord.trim(), keyWordSetMap.get(morpheme.text));
+				break;
+			case "반복":
+				int j = i-2;
+				Morpheme repeatMorp = morpList.get(j);
+				String repeat = "";
+				
+				do {
+					repeat = repeatMorp.text + repeat;
+					repeatMorp = morpList.get(--j);					
+				}while(repeatMorp.type.equals("NR")||repeatMorp.type.equals("MM"));
+				
+				keyWord = new KeyWord(morpheme.text, repeat, keyWordSetMap.get(morpheme.text));
+				break;
 			}
+
+			keyWordList.add(keyWord);
 		}
-		
-        prepareToCodeInfo.put("keyWordList", keyWordList);
         
-        return sentenceText.toString().getBytes().length;
+        Collections.sort(keyWordList, new Comparator<KeyWord>() {
+        	@Override
+        	public int compare(KeyWord o1, KeyWord o2) {
+        		return o2.priority - o1.priority;
+        	}
+		});
+        
+        prepareToCodeInfo.put("keyWordList", keyWordList);
+        prepareToCodeInfo.put("beforeSentenceLength", sentenceText.toString().getBytes().length);
+        
+//        System.out.println("target > " + prepareToCodeInfo.get("target"));
+//        System.out.println("repeat > " + prepareToCodeInfo.get("repeat"));
+//        System.out.println("keyWordList > " + prepareToCodeInfo.get("keyWordList"));
+        
+        return prepareToCodeInfo;
     }
     
     private static void showProcessingSentence(List<Map<String, Object>> sentenceInfoList) {
@@ -366,62 +349,6 @@ public class CodeInWriting {
         	System.out.println();
         	System.out.println();
         }
-    }
-    
-    private static StringBuilder buildLine() {
-    	StringBuilder line = new StringBuilder();
-    	for(int i=0; i<tapLev; i++) {
-			line.append("\t");
-		}
-    	return line;
-    }
-    
-    private static void setKeyWords() {
-
-        keyWord.add("출력");
-        keyWord.add("반복");
-        
-    }
-    
-    private static void setConvertToNumberMap() {
-    	convertToNumberMap.put("만", 10000);
-    	convertToNumberMap.put("천", 1000);
-    	convertToNumberMap.put("백", 100);
-    	convertToNumberMap.put("십", 10);
-    	
-    	convertToNumberMap.put("이", 2);
-    	convertToNumberMap.put("삼", 3);
-    	convertToNumberMap.put("사", 4);
-    	convertToNumberMap.put("오", 5);
-    	convertToNumberMap.put("육", 6);
-    	convertToNumberMap.put("칠", 7);
-    	convertToNumberMap.put("팔", 8);
-    	convertToNumberMap.put("구", 9);
-
-    	convertToNumberMap.put("한", 1);
-    	convertToNumberMap.put("두", 2);
-    	convertToNumberMap.put("세", 3);
-    	convertToNumberMap.put("네", 4);
-    	convertToNumberMap.put("다섯", 5);
-    	convertToNumberMap.put("여섯", 6);
-    	convertToNumberMap.put("일곱", 7);
-    	convertToNumberMap.put("여덟", 8);
-    	convertToNumberMap.put("아홉", 9);
-    	
-    	convertToNumberMap.put("열", 10);
-    	convertToNumberMap.put("스물", 20);
-    	convertToNumberMap.put("서른", 30);
-    	convertToNumberMap.put("마흔", 40);
-    	convertToNumberMap.put("쉰", 50);
-    	convertToNumberMap.put("예순", 60);
-    	convertToNumberMap.put("일흔", 70);
-    	convertToNumberMap.put("여든", 80);
-    	convertToNumberMap.put("아흔", 90);
-    }
-    
-    private static void settingCodeInWriting() {
-    	setKeyWords();
-    	setConvertToNumberMap();
     }
     
 }

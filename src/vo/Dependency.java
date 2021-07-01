@@ -17,8 +17,4 @@ public class Dependency {
 		this.mod = mod;
 	}
 	
-	@Override
-    public String toString() {
-    	return text;
-    }
 }
