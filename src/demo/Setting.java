@@ -15,8 +15,14 @@ public class Setting {
 
     	keyWordSetMap.put("출력", 0);
     	keyWordSetMap.put("변수", 1);
+    	keyWordSetMap.put("넣", 1);
+    	keyWordSetMap.put("블록", 1);
     	keyWordSetMap.put("반복", 2);
     	
+    	keyWordSetMap.put("더하", 1);
+    	keyWordSetMap.put("빼주", 1);
+    	keyWordSetMap.put("곱", 1);
+    	keyWordSetMap.put("나누", 1);
     }
     
     private static void setAdvanceCheckSet(Set<String> advanceCheckSet) {
@@ -29,6 +35,7 @@ public class Setting {
     	convertToNumberMap.put("백", 100);
     	convertToNumberMap.put("십", 10);
     	
+    	convertToNumberMap.put("일", 1);
     	convertToNumberMap.put("이", 2);
     	convertToNumberMap.put("삼", 3);
     	convertToNumberMap.put("사", 4);

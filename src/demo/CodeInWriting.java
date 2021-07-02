@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import com.google.gson.Gson;
 
@@ -31,6 +32,8 @@ public class CodeInWriting {
 	private static Set<String> advanceCheckSet = new HashSet<>();
 	private static Map<String, Variable> variableMap = new HashMap<>();
 	
+	private static Stack<Integer> blockStack = new Stack<>();
+	
 	private static StringBuilder requestText;
     public static void main(String[] args) {
 
@@ -41,8 +44,9 @@ public class CodeInWriting {
         String analysisCode = "srl";        
         
         requestText = new StringBuilder();
-        requestText.append("나를 찾아줘를 출력해줘.");
-//        requestText.append("정수형 변수 사과에 백을 담고. 정수형 변수 바나나에 이천을 담아서 정수형 변수 수박에 사과와 바나나를 더한 것을 담아주고. 바나나를 출력해줘.");
+//        requestText.append("변수 사과에 백을 담고. 변수 바나나에 천을 넣어줘. 바나나를 사과에 백 번 반복해서 나누어줘. 바나나에 사과를 백 번 반복해서 곱해줘. 바나나에 천이백삼십이에 이백십을 더한 것을 담아줘. 바나나를 출력해줘.");
+//        requestText.append("변수 사과에 일을 담고 변수 바나나에 일을 담아줘. 변수 망고에 일을 담아줘. 사과를 출력해줘. 바나나를 출력해줘. 망고에 사과에 바나나를 더해서 넣고. 망고를 출력, 사과에 바나나를 넣고 바나나에 망고를 넣는 것을 여덟 번 반복해줘.");
+        requestText.append("변수 사과에 백을 담아줘. 블록을 열어줘. 사과를 출력해줘. 사과에 일을 더해줘. 블록을 닫아줘. 스무 번 반복해줘.");
 
         
         Gson gson = new Gson();
@@ -183,25 +187,27 @@ public class CodeInWriting {
     		
     		for(KeyWord keyWord : keyWordList) {
 				switch (keyWord.text) {
+				case "블록":
+					int blockLine = CodeCommend.codeBlock(code, keyWord);
+					if(blockLine!=-1) {
+						blockStack.add(blockLine);
+					}
+					break;
 				case "변수":
 					CodeCommend.codeVariable(code, keyWord, variableMap.get(keyWord.info));
 					break;
 				case "출력":
-					CodeCommend.codePrint(code, keyWord);
+					CodeCommend.codePrint(code, keyWord, variableMap);
 					break;
 				case "반복":
-					CodeCommend.codeFor(code, keyWord);
+					CodeCommend.codeFor(code, keyWord, blockStack);
+					break;
+				default:
+					CodeCommend.codeOperator(code, keyWord);
 					break;
 				}
     		}
-    		while(CodeCommend.tapLev>2) {
-    			CodeCommend.tapLev--;
-    			StringBuilder line = CodeCommend.buildLine();
-    			line.append("}\n");
-    			code.add(line);
-    		}
     	}
-        
         
         code.add(new StringBuilder().append("\t}").append("\n"));
         code.add(new StringBuilder().append("}"));
@@ -232,15 +238,18 @@ public class CodeInWriting {
 			KeyWord keyWord = null;
 			
 			switch (morpheme.text) {
+			case "블록":
+				Morpheme openOrClose = morpList.get(i+2);
+				keyWord = new KeyWord(morpheme.text, openOrClose.text, keyWordSetMap.get(morpheme.text));
+				break;
 			case "변수":
 				String variableName = morpList.get(i+1).text;
 				if(!variableMap.containsKey(variableName)) {
-					String variableType = morpList.get(i-2).text;
 					Morpheme startVariableValue = morpList.get(i+3);
 					Morpheme endVariableValue = null;
 					for(int j=i+4; j<morpList.size(); j++) {
 						endVariableValue = morpList.get(j);
-						if(endVariableValue.type.equals("JKO")&&morpList.get(j+1).text.equals("담")||morpList.get(j+1).text.equals("넣"))
+						if(endVariableValue.type.equals("JKO")&&morpList.get(j+1).text.equals("담아주")||morpList.get(j+1).text.equals("담")||morpList.get(j+1).text.equals("넣"))
 							break;
 					}
 					
@@ -260,7 +269,7 @@ public class CodeInWriting {
 					
 					String variableValue = sentenceText.substring(startCutIdx, endCutIdx);
 					
-					variableMap.put(variableName, new Variable(variableType, variableName, variableValue.trim()));
+					variableMap.put(variableName, new Variable("int", variableName, variableValue.trim()));
 
 					keyWord = new KeyWord(morpheme.text, variableName, keyWordSetMap.get(morpheme.text));
 				}
@@ -287,28 +296,75 @@ public class CodeInWriting {
 				keyWord = new KeyWord(morpheme.text, subWord.trim(), keyWordSetMap.get(morpheme.text));
 				break;
 			case "반복":
+			{
 				int j = i-2;
 				Morpheme repeatMorp = morpList.get(j);
 				String repeat = "";
 				
 				do {
 					repeat = repeatMorp.text + repeat;
+					if(j==0)
+						break;
 					repeatMorp = morpList.get(--j);					
 				}while(repeatMorp.type.equals("NR")||repeatMorp.type.equals("MM"));
 				
 				keyWord = new KeyWord(morpheme.text, repeat, keyWordSetMap.get(morpheme.text));
+			}
+				break;
+			default:
+				String toVal = "";
+				String opVal1 = "";
+				String opVal2 = "";
+				
+				int j = 0;
+				
+				do {
+					Morpheme morp = morpList.get(j++);
+					switch (morp.type) {
+					case "JKB":
+						if(toVal.equals("")) {
+							toVal = morpList.get(j-2).text;
+						}else {
+							int k = j-2;
+							Morpheme opVal1Morp = morpList.get(k);
+							opVal1 = opVal1Morp.text;
+							if(opVal1Morp.type.equals("NR")||opVal1Morp.type.equals("MM")||opVal1Morp.type.equals("NNB")) {
+								opVal1Morp = morpList.get(--k);
+								while(opVal1Morp.type.equals("NR")||opVal1Morp.type.equals("MM")) {
+									opVal1 = opVal1Morp.text + opVal1;
+									opVal1Morp = morpList.get(--k);
+								}
+							}
+						}
+						break;
+					case "JKO":
+						int k = j-2;
+						Morpheme opVal2Morp = morpList.get(k);
+						opVal2 = opVal2Morp.text;
+						if(opVal2Morp.type.equals("NR")||opVal2Morp.type.equals("MM")||opVal2Morp.type.equals("NNB")) {
+							opVal2Morp = morpList.get(--k);
+							while(opVal2Morp.type.equals("NR")||opVal2Morp.type.equals("MM")) {
+								opVal2 = opVal2Morp.text + opVal2;
+								opVal2Morp = morpList.get(--k);
+							}
+						}
+						break;
+					}
+				}while(toVal.equals("")||opVal2.equals(""));
+				
+				keyWord = new KeyWord(morpheme.text, new String[] {toVal, opVal1, opVal2}, keyWordSetMap.get(morpheme.text));
 				break;
 			}
 
 			keyWordList.add(keyWord);
 		}
         
-        Collections.sort(keyWordList, new Comparator<KeyWord>() {
-        	@Override
-        	public int compare(KeyWord o1, KeyWord o2) {
-        		return o2.priority - o1.priority;
-        	}
-		});
+//        Collections.sort(keyWordList, new Comparator<KeyWord>() {
+//        	@Override
+//        	public int compare(KeyWord o1, KeyWord o2) {
+//        		return o2.priority - o1.priority;
+//        	}
+//		});
         
         prepareToCodeInfo.put("keyWordList", keyWordList);
         prepareToCodeInfo.put("beforeSentenceLength", sentenceText.toString().getBytes().length);
