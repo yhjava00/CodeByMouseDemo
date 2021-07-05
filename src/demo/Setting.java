@@ -1,23 +1,38 @@
 package demo;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class Setting {
 
-    public static void settingCodeInWriting(Map<String, Integer> keyWordSetMap, Set<String> advanceCheckSet, Map<String, Integer> convertToNumberMap) {
+    public static void settingCodeInWriting(List<StringBuilder> code, Map<String, Integer> keyWordSetMap, Set<String> compareSet, Map<String, Integer> convertToNumberMap) {
     	setKeyWordsSetMap(keyWordSetMap);
-    	setAdvanceCheckSet(advanceCheckSet);
     	setConvertToNumberMap(convertToNumberMap);
+    	
+
+    	code.add(new StringBuilder().append("public class Main {").append("\n"));
+    	code.add(new StringBuilder().append("\tpublic static void main(String[] args) {").append("\n"));
+
     }
     
     private static void setKeyWordsSetMap(Map<String, Integer> keyWordSetMap) {
+    	keyWordSetMap.put("줄", 1);
+    	keyWordSetMap.put("스캐너", 1);
+    	keyWordSetMap.put("입력", 1);
+    	keyWordSetMap.put("종료", 1);
 
     	keyWordSetMap.put("출력", 0);
-    	keyWordSetMap.put("변수", 1);
-    	keyWordSetMap.put("넣", 1);
-    	keyWordSetMap.put("블록", 1);
     	keyWordSetMap.put("반복", 2);
+    	keyWordSetMap.put("조건", 1);
+    	keyWordSetMap.put("면", 1);
+    	keyWordSetMap.put("으면", 1);
+    	
+    	keyWordSetMap.put("변수", 1);
+    	
+    	keyWordSetMap.put("넣", 1);
+    	keyWordSetMap.put("담아주", 1);
+    	keyWordSetMap.put("담", 1);
     	
     	keyWordSetMap.put("더하", 1);
     	keyWordSetMap.put("빼주", 1);
@@ -25,8 +40,10 @@ public class Setting {
     	keyWordSetMap.put("나누", 1);
     }
     
-    private static void setAdvanceCheckSet(Set<String> advanceCheckSet) {
-    	advanceCheckSet.add("변수");
+    private static void setCompareValue(Set<String> compareSet) {
+    	compareSet.add("작");
+    	compareSet.add("크");
+    	compareSet.add("같");    	
     }
     
     private static void setConvertToNumberMap(Map<String, Integer> convertToNumberMap) {
@@ -45,6 +62,7 @@ public class Setting {
     	convertToNumberMap.put("팔", 8);
     	convertToNumberMap.put("구", 9);
 
+    	convertToNumberMap.put("첫", 1);
     	convertToNumberMap.put("한", 1);
     	convertToNumberMap.put("두", 2);
     	convertToNumberMap.put("세", 3);
