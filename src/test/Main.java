@@ -1,25 +1,25 @@
 package test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 
-import demo.CodeCommend;
-import demo.Setting;
-import vo.KeyWord;
-
- public class Main {
+public class Main {
  	public static void main(String[] args) {
- 		int a = 100;
- 		
- 		while(a-->0) {
- 			
+ 		Scanner 키위 = new Scanner(System.in);
+ 		int 사과 = 키위.nextInt();
+ 		if(사과 < 2) {
+ 			System.out.println("소수가 아닙니다");
+ 			return;
  		}
- 		
- 		System.out.println("hello");
- 		
+ 		if(사과 == 2) {
+ 			System.out.println("소수입니다");
+ 			return;
+ 		}
+ 		for(int 귤=2; 귤<사과; 귤++) {
+ 			if(사과 % 귤 == 0) {
+ 				System.out.println("소수가 아닙니다");
+				return;
+ 			}
+ 		}
+ 		System.out.println("소수입니다");
  	}
-}
+ }

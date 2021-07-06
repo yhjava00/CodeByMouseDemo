@@ -1,4 +1,4 @@
-package demo;
+package demo01;
 
 import java.util.List;
 import java.util.Map;
@@ -17,16 +17,16 @@ public class Setting {
     }
     
     private static void setKeyWordsSetMap(Map<String, Integer> keyWordSetMap) {
-    	keyWordSetMap.put("줄", 1);
-    	keyWordSetMap.put("스캐너", 1);
-    	keyWordSetMap.put("입력", 1);
-    	keyWordSetMap.put("종료", 1);
+    	keyWordSetMap.put("줄", 0);
+    	keyWordSetMap.put("스캐너", 0);
+    	keyWordSetMap.put("입력", 0);
+    	keyWordSetMap.put("종료", 0);
 
     	keyWordSetMap.put("출력", 0);
     	keyWordSetMap.put("반복", 2);
-    	keyWordSetMap.put("조건", 1);
-    	keyWordSetMap.put("면", 1);
-    	keyWordSetMap.put("으면", 1);
+    	keyWordSetMap.put("조건", 2);
+    	keyWordSetMap.put("면", 2);
+    	keyWordSetMap.put("으면", 2);
     	
     	keyWordSetMap.put("변수", 1);
     	
@@ -38,6 +38,7 @@ public class Setting {
     	keyWordSetMap.put("빼주", 1);
     	keyWordSetMap.put("곱", 1);
     	keyWordSetMap.put("나누", 1);
+    	keyWordSetMap.put("나눠줘", 1);
     }
     
     private static void setCompareValue(Set<String> compareSet) {
@@ -51,6 +52,8 @@ public class Setting {
     	convertToNumberMap.put("천", 1000);
     	convertToNumberMap.put("백", 100);
     	convertToNumberMap.put("십", 10);
+
+    	convertToNumberMap.put("영", 0);
     	
     	convertToNumberMap.put("일", 1);
     	convertToNumberMap.put("이", 2);

@@ -1,10 +1,9 @@
-package demo;
+package demo01;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import vo.KeyWord;
 import vo.Morpheme;
@@ -72,6 +71,45 @@ public class CodeCommend {
 		code.add(line);
 	}
 	
+	public static String writeCondition(KeyWord keyWord) {
+		StringBuilder condition = new StringBuilder();
+		
+		String[] opValues = (String[]) keyWord.info;
+		
+    	String op = " + ";
+    	switch (keyWord.text) {
+		case "더하":
+			op = " + ";
+			break;
+		case "빼주":
+			op = " - ";
+			break;
+		case "곱":
+			op = " * ";
+			break;
+		case "나누":
+		case "나눠줘":
+			op = " / ";
+			break;
+		case "나머지":
+			op = " % ";
+			break;
+		}
+
+		String num = convertToNumber(opValues[0]) + "";
+		if(!num.equals("-1")) {
+			opValues[0] = num;
+		}
+		num = convertToNumber(opValues[2]) + "";
+		if(!num.equals("-1")) {
+			opValues[2] = num;
+		}
+		
+		condition.append(opValues[0]).append(op).append(opValues[2]);
+		
+		return condition.toString();
+	}
+	
 	public static void codeConditional(List<StringBuilder> code, KeyWord keyWord, String[] selectedLine) {
 
     	int startLine = convertToNumber(selectedLine[0])-1;
@@ -91,12 +129,13 @@ public class CodeCommend {
     	boolean negative = (boolean) conditionalInfo.get("negative");
     	
     	int temp = convertToNumber(targetValue);
-    	if(temp>0) {
+    	if(temp>-1) {
     		targetValue = Integer.toString(temp);
     	}
-    	
+
     	temp = convertToNumber(compareValue);
-    	if(temp>0) {
+
+    	if(temp>-1) {
     		compareValue = Integer.toString(temp);
     	}
     	
@@ -199,9 +238,27 @@ public class CodeCommend {
     		endLine = temp;
     	}
     	
-    	int repeat = convertToNumber((String) keyWord.info);
+    	String[] forInfo = (String[]) keyWord.info;
     	
-    	StringBuilder line = buildLine().append("for(int i=0; i<").append(repeat).append("; i++) {\n");
+    	if(forInfo[1].equals("")) {
+    		int repeat = convertToNumber(forInfo[0]);
+    		forInfo[0] = "0";
+    		forInfo[1] = Integer.toString(repeat);
+    	}else {
+    		
+    		int temp = convertToNumber(forInfo[0]);
+        	if(temp>-1) {
+        		forInfo[0] = Integer.toString(temp);
+        	}
+
+        	temp = convertToNumber(forInfo[1]);
+        	if(temp>-1) {
+        		forInfo[1] = Integer.toString(temp);
+        	}
+    	}
+    	
+    	
+    	StringBuilder line = buildLine().append("for(int 귤=").append(forInfo[0]).append("; 귤<").append(forInfo[1]).append("; 귤++) {\n");
     	
     	if(startLine<0) {
     		code.add(endLine, line);
@@ -229,6 +286,7 @@ public class CodeCommend {
     	StringBuilder line = buildLine();
     	
     	String op = " = ";
+    	
     	if(opValues[1].equals("")) {
     		switch (keyWord.text) {
     		case "더하":
@@ -241,6 +299,7 @@ public class CodeCommend {
     			op = " *= ";
     			break;
     		case "나누":
+    		case "나눠줘":
     			op = " /= ";
     			break;
     		case "나머지":
@@ -266,6 +325,7 @@ public class CodeCommend {
     			op = " * ";
     			break;
     		case "나누":
+    		case "나눠줘":
     			op = " / ";
     			break;
     		case "나머지":
