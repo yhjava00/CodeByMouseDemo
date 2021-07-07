@@ -1,27 +1,29 @@
 package demo02;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 
 import common.ConnnectAI;
-import vo.Variable;
+import vo.Morpheme;
 
 public class CodeInWriting02 {
 	
-	private static List<StringBuilder> code = new LinkedList<StringBuilder>();
+	static List<StringBuilder> code = new LinkedList<>();
 	
-	private static Map<String, Integer> keyWordSetMap = new HashMap<>();
-	private static Map<String, Variable> variableMap = new HashMap<>();
-	private static Set<String> compareSet = new HashSet<>();
+	static Map<String, Integer> keyWordMap = new HashMap<String, Integer>();
 	
 	private static StringBuilder requestText;
     public static void main(String[] args) {
     	
+    	Setting02.settingCodeInWriting(keyWordMap);
+    	
+    	code.add(new StringBuilder().append("public class Main {").append("\n"));
+    	code.add(new StringBuilder().append("\tpublic static void main(String[] args) {").append("\n"));
+
         Scanner sc = new Scanner(System.in);
         
         while(true) {
@@ -37,20 +39,22 @@ public class CodeInWriting02 {
 
         	List<Map<String, Object>> sentenceInfoList = ConnnectAI.connect(requestText.toString());
         	
-//        	buildCode(sentenceInfoList);
+        	for(Map<String, Object> sentenceInfo : sentenceInfoList) {
+        		
+        		List<Morpheme> morpList = (List<Morpheme>) sentenceInfo.get("morpList");
+        		
+        		relationshipCreation(morpList);
+        	}
         }
         
         sc.close();
         
     }
     
-    private static void buildCode(List<Map<String, Object>> sentenceInfoList) {
+    private static void relationshipCreation(List<Morpheme> morpList) {
     	
-    }
-    
-    private static Map<String, Object> prepareToCode(Map<String, Object> sentenceInfo, int beforeSentenceLength) {
     	
-        return null;
+    	
     }
     
 }

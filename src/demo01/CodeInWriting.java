@@ -255,6 +255,7 @@ public class CodeInWriting {
 					do {
 						startCutIdx = sentenceText.indexOf(startVariableValue.text, startCutIdx+1);
 						subWord = sentenceText.substring(0, startCutIdx);
+						System.out.println(subWord);
 					} while(startVariableValue.position!=subWord.getBytes().length+beforeSentenceLength);
 					
 					subWord = "";
@@ -338,7 +339,7 @@ public class CodeInWriting {
 			}
 				break;
 			case "종료":
-				keyWord = new KeyWord(morpheme.text, null, keyWordSetMap.get(morpheme.text));
+				keyWord = new KeyWord(morpheme.text, "", keyWordSetMap.get(morpheme.text));
 				break;
 			default:
 				

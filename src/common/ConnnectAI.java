@@ -27,9 +27,6 @@ public class ConnnectAI {
         
         Gson gson = new Gson();
         
-        System.out.println(requestText);
-        System.out.println();
-        
         Map<String, Object> request = new HashMap<>();
         Map<String, String> argument = new HashMap<>();
  
@@ -95,6 +92,7 @@ public class ConnnectAI {
             
             sentenceInfoList = new ArrayList<>();
             
+            //demo01
             for( Map<String, Object> sentence : sentences ) {
             	
             	Map<String, Object> sentenceInfo = new HashMap<>();
@@ -122,7 +120,7 @@ public class ConnnectAI {
                 	
             		dependencyList.add(new Dependency(id, text, head, label, mod));
                 }
-                
+               
                 String sentenceText = (String) sentence.get("text");
                 
                 sentenceInfo.put("text", sentenceText);
@@ -132,6 +130,9 @@ public class ConnnectAI {
                 sentenceInfoList.add(sentenceInfo);
             }
 
+            System.out.println(requestText);
+            System.out.println();
+            
 //            System.out.println(responBodyJson);
 //            System.out.println();
             
