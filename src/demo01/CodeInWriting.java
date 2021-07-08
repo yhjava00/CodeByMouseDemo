@@ -22,12 +22,13 @@ public class CodeInWriting {
 	
 	private static Map<String, Integer> keyWordSetMap = new HashMap<>();
 	private static Map<String, Variable> variableMap = new HashMap<>();
-	private static Set<String> compareSet = new HashSet<>();
+
+	static int actionLine = -1;
 	
 	private static StringBuilder requestText;
     public static void main(String[] args) {
     	
-    	Setting.settingCodeInWriting(code, keyWordSetMap, compareSet, CodeCommend.convertToNumberMap);
+    	Setting.settingCodeInWriting(code, keyWordSetMap, CodeCommend.convertToNumberMap);
     	
         Scanner sc = new Scanner(System.in);
         
@@ -71,6 +72,20 @@ public class CodeInWriting {
     			KeyWord keyWord = keyWordList.get(i);
     			
 				switch (keyWord.text) {
+				case "괄호":
+					CodeCommend.codeBracket(code, keyWord, actionLine);
+					break;
+				case "작업":
+				{
+					String state = (String) keyWord.info;
+					if(state.equals("start")) {
+						String[] selectedLine = (String[]) prepareToCodeInfo.get("selectedLine");
+						actionLine = CodeCommend.convertToNumber(selectedLine[0])-1;
+					}else {
+						actionLine = -1;
+					}
+				}
+					break;
 				case "스캐너":
 					variableMap.put("키위", new Variable("Scanner", "키위", "Scanner"));
 					CodeCommend.codeScanner(code, keyWord);
@@ -104,7 +119,11 @@ public class CodeInWriting {
 					CodeCommend.codeReturn(code);
 					break;
 				default:
-					CodeCommend.codeOperator(code, keyWord);
+					if(actionLine>-1) {
+						CodeCommend.codeOperator(code, keyWord, actionLine);						
+					}else {
+						CodeCommend.codeOperator(code, keyWord);						
+					}
 					break;
 				}
     		}
@@ -113,7 +132,11 @@ public class CodeInWriting {
         StringBuilder finalCode = new StringBuilder();
         int i=0;
         for(; i<code.size(); i++) {
-        	finalCode.append(i+1).append(". ").append(code.get(i));
+        	if(i==actionLine) {
+        		finalCode.append(i+1).append(" > ").append(code.get(i));
+        	}else {
+        		finalCode.append(i+1).append(". ").append(code.get(i));
+        	}
         }
         
         finalCode.append(++i).append(". ").append("\t}").append("\n");
@@ -142,6 +165,38 @@ public class CodeInWriting {
 			KeyWord keyWord = null;
 			
 			switch (morpheme.text) {
+			case "괄호":
+			{
+				int j=i-1;
+				String[] range = {"", ""};
+				for(; j>=0; j--) {
+					Morpheme morp = morpList.get(j);
+					if(morp.text.equals("까지")) {
+						morp = morpList.get(--j);
+						j = (morp.text.equals("번째"))?j-1:j-2;
+						while(j>=0&&(morp = morpList.get(j--)).type.equals("MM")||morp.type.equals("NR")) {
+							range[1] = morp.text + range[1];
+						}
+					}
+					if(morp.text.equals("부터")) {
+						morp = morpList.get(j);
+						j = (morp.text.equals("번째"))?j-1:j-2;
+						while(j>=0&&(morp = morpList.get(j--)).type.equals("MM")||morp.type.equals("NR")) {
+							range[0] = morp.text + range[0];
+						}
+					}
+				}
+				keyWord = new KeyWord(morpheme.text, range, keyWordSetMap.get(morpheme.text));
+			}
+				break;
+			case "작업":
+				Morpheme nextMorp = morpList.get(i+2);
+				if(nextMorp.text.equals("끝내주")) {
+					keyWord = new KeyWord(morpheme.text, "end", keyWordSetMap.get(morpheme.text));
+				}else {
+					keyWord = new KeyWord(morpheme.text, "start", keyWordSetMap.get(morpheme.text));
+				}
+				break;
 			case "스캐너":
 				Morpheme actionMorp = morpList.get(i+2);
 				
@@ -182,7 +237,7 @@ public class CodeInWriting {
 				}
 				
 				compareMorp = morpList.get(j-2);
-				if(compareOP.equals("같")&&compareSet.contains(compareMorp.text)) {
+				if(compareOP.equals("같")) {
 					compareOP += compareMorp.text;
 				}
 				
@@ -232,15 +287,21 @@ public class CodeInWriting {
 				}
 				
 				prepareToCodeInfo.put("selectedLine", selectedLine);
-				
-				
 			}
 				continue;
 			case "변수":
 				inputValue = false;
 				String variableName = morpList.get(i+1).text;
+				
 				if(!variableMap.containsKey(variableName)) {
 					Morpheme startVariableValue = morpList.get(i+3);
+					if(startVariableValue.text.equals("만들")||startVariableValue.text.equals("생성")) {
+						
+						String type = morpList.get(i-2).text;
+						variableMap.put(variableName, new Variable(type, variableName, null));
+						keyWord = new KeyWord(morpheme.text, variableName, keyWordSetMap.get(morpheme.text));
+						break;
+					}
 					Morpheme endVariableValue = null;
 					for(int j=i+4; j<morpList.size(); j++) {
 						endVariableValue = morpList.get(j);
@@ -250,12 +311,17 @@ public class CodeInWriting {
 							break;
 					}
 					
+					if(startVariableValue.text.equals("오르")) {
+						variableMap.put(variableName, new Variable("int", variableName, "오"));
+						keyWord = new KeyWord(morpheme.text, variableName, keyWordSetMap.get(morpheme.text));
+						break;
+					}
+					
 					String subWord = "";
 					int startCutIdx = 0;
 					do {
 						startCutIdx = sentenceText.indexOf(startVariableValue.text, startCutIdx+1);
 						subWord = sentenceText.substring(0, startCutIdx);
-						System.out.println(subWord);
 					} while(startVariableValue.position!=subWord.getBytes().length+beforeSentenceLength);
 					
 					subWord = "";

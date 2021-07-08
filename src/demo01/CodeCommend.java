@@ -2,8 +2,10 @@ package demo01;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import vo.KeyWord;
 import vo.Morpheme;
@@ -11,7 +13,9 @@ import vo.Variable;
 
 public class CodeCommend {
 
-	public static Map<String, Integer> convertToNumberMap = new HashMap<>();  
+	public static Map<String, Integer> convertToNumberMap = new HashMap<>();
+	
+	public static Set<String> opSet = new HashSet<>();
 
 	public static int tapLev = 2;
 	
@@ -182,12 +186,12 @@ public class CodeCommend {
 
     	StringBuilder line = buildLine();
 
-    	if(variable.value.equals("정수")) {
-    		line.append("int ");
+    	if(variable.type.equals("정수")) {
+    		line.append("int ").append(variable.name).append(";\n");
     		code.add(line);
     		return;
-    	}else if(variable.value.equals("문장")) {
-    		line.append("String ");
+    	}else if(variable.type.equals("장")) {
+    		line.append("String ").append(variable.name).append(";\n");
     		code.add(line);
     		return;    		
     	}
@@ -257,7 +261,6 @@ public class CodeCommend {
         	}
     	}
     	
-    	
     	StringBuilder line = buildLine().append("for(int 귤=").append(forInfo[0]).append("; 귤<").append(forInfo[1]).append("; 귤++) {\n");
     	
     	if(startLine<0) {
@@ -273,6 +276,68 @@ public class CodeCommend {
 		
     	code.add(startLine, line);
     	code.add(endLine+1, buildLine().append("}\n"));
+    	
+    }
+    
+    public static void codeBracket(List<StringBuilder> code, KeyWord keyWord, int actionLine) {
+    	
+    	if(actionLine<0)  {
+    		actionLine = code.size()-1;
+    	}
+    	
+    	StringBuilder line = code.get(actionLine);
+    	
+    	line.deleteCharAt(line.indexOf(";"));
+    	
+    	String[] range = (String[]) keyWord.info;
+    	
+    	String subStr = line.substring(line.indexOf("=")+1);
+    	
+    	String[] subWords = subStr.split(" ");
+    	List<String> targetWords = new ArrayList<>();
+    	
+    	for(int i=0; i<subWords.length; i++) {
+    		if(!opSet.contains(subWords[i])) {
+    			targetWords.add(subWords[i]);
+    		}
+    	}
+    	
+    	for(int i=0; i<targetWords.size(); i++) {
+    		System.out.println(i + " " + targetWords.get(i));
+    	}
+    	
+    }
+    public static void codeOperator(List<StringBuilder> code, KeyWord keyWord, int actionLine) {
+    	
+    	String[] opValues = (String[]) keyWord.info;
+    	
+    	if(opValues==null)
+    		return;
+
+    	StringBuilder line = code.get(actionLine);
+    	
+    	String op = " = ";
+    	
+    	if(opValues[1].equals("")) {
+    		switch (keyWord.text) {
+    		case "더하":
+    			op = " + ";
+    			break;
+    		case "빼주":
+    			op = " - ";
+    			break;
+    		case "곱":
+    			op = " * ";
+    			break;
+    		case "나누":
+    		case "나눠줘":
+    			op = " / ";
+    			break;
+    		case "나머지":
+    			op = " % ";
+    			break;
+    		}
+    	}
     	
     }
     
@@ -293,6 +358,7 @@ public class CodeCommend {
     			op = " += ";
     			break;
     		case "빼주":
+    		case "빼":
     			op = " -= ";
     			break;
     		case "곱":
@@ -319,6 +385,7 @@ public class CodeCommend {
     			op = " + ";
     			break;
     		case "빼주":
+    		case "빼":
     			op = " - ";
     			break;
     		case "곱":

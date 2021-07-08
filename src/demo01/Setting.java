@@ -6,14 +6,23 @@ import java.util.Set;
 
 public class Setting {
 
-    public static void settingCodeInWriting(List<StringBuilder> code, Map<String, Integer> keyWordSetMap, Set<String> compareSet, Map<String, Integer> convertToNumberMap) {
+    public static void settingCodeInWriting(List<StringBuilder> code, Map<String, Integer> keyWordSetMap, Map<String, Integer> convertToNumberMap) {
     	setKeyWordsSetMap(keyWordSetMap);
     	setConvertToNumberMap(convertToNumberMap);
-    	
+    	setOpSet(CodeCommend.opSet);
 
     	code.add(new StringBuilder().append("public class Main {").append("\n"));
     	code.add(new StringBuilder().append("\tpublic static void main(String[] args) {").append("\n"));
 
+    }
+    
+    private static void setOpSet(Set<String> opSet) {
+    	opSet.add("+");
+    	opSet.add("-");
+    	opSet.add("*");
+    	opSet.add("/");
+    	opSet.add("%");
+    	opSet.add("");
     }
     
     private static void setKeyWordsSetMap(Map<String, Integer> keyWordSetMap) {
@@ -21,6 +30,7 @@ public class Setting {
     	keyWordSetMap.put("스캐너", 0);
     	keyWordSetMap.put("입력", 0);
     	keyWordSetMap.put("종료", 0);
+    	keyWordSetMap.put("작업", 0);
 
     	keyWordSetMap.put("출력", 0);
     	keyWordSetMap.put("반복", 2);
@@ -34,8 +44,11 @@ public class Setting {
     	keyWordSetMap.put("담아주", 1);
     	keyWordSetMap.put("담", 1);
     	
+    	keyWordSetMap.put("괄호", 1);
+    	
     	keyWordSetMap.put("더하", 1);
     	keyWordSetMap.put("빼주", 1);
+    	keyWordSetMap.put("빼", 1);
     	keyWordSetMap.put("곱", 1);
     	keyWordSetMap.put("나누", 1);
     	keyWordSetMap.put("나눠줘", 1);
