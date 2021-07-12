@@ -6,40 +6,17 @@ import java.util.Set;
 
 public class Setting02 {
     
-	public static void settingCodeInWriting(Map<String, Integer> keyWordMap) {
-		setKeyWordMap(keyWordMap);
+	public static void settingCodeInWriting(Set<String> keyWordSet) {
+		setKeyWord(keyWordSet);
 		setConvertToNumberMap(CodeCommend02.convertToNumberMap);
 	}
 	
-	private static void setKeyWordMap(Map<String, Integer> keyWordMap) {
+	private static void setKeyWord(Set<String> keyWordSet) {
 		
-		keyWordMap.put("줄", 0);
-		
-    	keyWordMap.put("스캐너", 0);
-    	keyWordMap.put("입력", 0);
+    	keyWordSet.add("출력");
     	
-    	keyWordMap.put("종료", 0);
-
-    	keyWordMap.put("출력", 0);
+    	keyWordSet.add("반복");
     	
-    	keyWordMap.put("반복", 2);
-    	keyWordMap.put("번", 2);
-    	
-    	keyWordMap.put("조건", 2);
-    	keyWordMap.put("면", 2);
-    	keyWordMap.put("으면", 2);
-    	
-    	keyWordMap.put("변수", 1);
-    	
-    	keyWordMap.put("넣", 1);
-    	keyWordMap.put("담아주", 1);
-    	keyWordMap.put("담", 1);
-    	
-    	keyWordMap.put("더하", 1);
-    	keyWordMap.put("빼주", 1);
-    	keyWordMap.put("곱", 1);
-    	keyWordMap.put("나누", 1);
-    	keyWordMap.put("나눠줘", 1);
 	}
 	
 	private static void setConvertToNumberMap(Map<String, Integer> convertToNumberMap) {

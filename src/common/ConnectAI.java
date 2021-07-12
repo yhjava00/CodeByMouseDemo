@@ -18,9 +18,9 @@ import com.google.gson.Gson;
 import vo.Dependency;
 import vo.Morpheme;
 
-public class ConnnectAI {
+public class ConnectAI {
 	
-	public static List<Map<String, Object>> connect(String requestText) {
+	public static List<Morpheme> connect(String requestText) {
 		String openApiURL = "http://aiopen.etri.re.kr:8000/WiseNLU";         
         String accessKey = "";
         String analysisCode = "srl";
@@ -143,7 +143,7 @@ public class ConnnectAI {
             e.printStackTrace();
         }
         
-        return sentenceInfoList;
+        return (List<Morpheme>) sentenceInfoList.get(0).get("morpList");
 	}
 	private static void showProcessingSentence(List<Map<String, Object>> sentenceInfoList) {
     	

@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import common.ConnnectAI;
+import common.ConnectAI;
 import vo.KeyWord;
 import vo.Morpheme;
 import vo.Variable;
@@ -46,9 +46,9 @@ public class CodeInWriting {
         		break;
         	}
 
-        	List<Map<String, Object>> sentenceInfoList = ConnnectAI.connect(requestText.toString());
-        	
-        	buildCode(sentenceInfoList);
+//        	List<Map<String, Object>> sentenceInfoList = ConnectAI.connect(requestText.toString());
+//        	
+//        	buildCode(sentenceInfoList);
         }
         
         sc.close();
