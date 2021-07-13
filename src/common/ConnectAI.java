@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.google.gson.Gson;
 
@@ -20,9 +21,120 @@ import vo.Morpheme;
 
 public class ConnectAI {
 	
-	public static List<Morpheme> connect(String requestText) {
+	static String accessKey = "";
+	
+	public static String openDialog() {
+		String openApiURL = "http://aiopen.etri.re.kr:8000/Dialog";
+        String domain = "mimir";
+        String access_method = "internal_data";
+        String method = "open_dialog";
+        Gson gson = new Gson();
+ 
+        Map<String, Object> request = new HashMap<>();
+        Map<String, String> argument = new HashMap<>();
+ 
+        ////////////////////////// OPEN DIALOG //////////////////////////
+ 
+        argument.put("name", domain);
+        argument.put("access_method", access_method);
+        argument.put("method", method);
+ 
+        request.put("access_key", accessKey);
+        request.put("argument", argument);
+ 
+ 
+        URL url;
+        Integer responseCode = null;
+        String responBodyJson = null;
+        Map<String, Object> responeBody = null;
+        try {
+                url = new URL(openApiURL);
+                HttpURLConnection con = (HttpURLConnection)url.openConnection();
+                con.setRequestMethod("POST");
+                con.setDoOutput(true);
+ 
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.write(gson.toJson(request).getBytes("UTF-8"));
+                wr.flush();
+                wr.close();
+ 
+                responseCode = con.getResponseCode();
+                InputStream is = con.getInputStream();
+                byte[] buffer = new byte[is.available()];
+                int byteRead = is.read(buffer);
+                responBodyJson = new String(buffer);
+                
+                responeBody = gson.fromJson(responBodyJson, Map.class);
+        } catch (MalformedURLException e) {
+                e.printStackTrace();
+        } catch (IOException e) {
+                e.printStackTrace();
+        }
+        Map<String, Object> return_object = (Map<String, Object>) responeBody.get("return_object");
+        
+        String uuid = (String) return_object.get("uuid");
+        return uuid;
+	}
+	
+	public static Map<String, Object> dialog(String uuid) {
+		String openApiURL = "http://aiopen.etri.re.kr:8000/Dialog";
+        String method = "dialog";
+        
+        Scanner sc = new Scanner(System.in);
+        
+        String text = sc.nextLine();
+        
+        Gson gson = new Gson();
+ 
+        Map<String, Object> request = new HashMap<>();
+        Map<String, String> argument = new HashMap<>();
+ 
+        ////////////////////////// OPEN DIALOG //////////////////////////
+ 
+        argument.put("uuid", uuid);
+        argument.put("method", method);
+        argument.put("text", text);
+ 
+        request.put("access_key", accessKey);
+        request.put("argument", argument);
+ 
+ 
+        URL url;
+        Integer responseCode = null;
+        String responBodyJson = null;
+        Map<String, Object> responeBody = null;
+        try {
+                url = new URL(openApiURL);
+                HttpURLConnection con = (HttpURLConnection)url.openConnection();
+                con.setRequestMethod("POST");
+                con.setDoOutput(true);
+ 
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.write(gson.toJson(request).getBytes("UTF-8"));
+                wr.flush();
+                wr.close();
+ 
+                responseCode = con.getResponseCode();
+                InputStream is = con.getInputStream();
+                byte[] buffer = new byte[is.available()];
+                int byteRead = is.read(buffer);
+                responBodyJson = new String(buffer);
+                
+                responeBody = gson.fromJson(responBodyJson, Map.class);
+        } catch (MalformedURLException e) {
+                e.printStackTrace();
+        } catch (IOException e) {
+                e.printStackTrace();
+        }
+        
+        Map<String, Object> return_object = (Map<String, Object>) responeBody.get("return_object");
+        Map<String, Object> result = (Map<String, Object>) return_object.get("result");
+        
+        return result;
+	}
+	
+	public static List<Morpheme> morphemeSeparation(String requestText) {
 		String openApiURL = "http://aiopen.etri.re.kr:8000/WiseNLU";         
-        String accessKey = "";
         String analysisCode = "srl";
         
         Gson gson = new Gson();

@@ -13,6 +13,8 @@ public class CodeCommend02 {
 
 	private static Scanner sc = new Scanner(System.in);
 	
+	public static int tapLev = 2;
+	
 	public static Map<String, Integer> convertToNumberMap = new HashMap<>();
 	
 	public static void codePrint(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> morpList) {
@@ -26,20 +28,24 @@ public class CodeCommend02 {
 			printValue = sc.nextLine();
 		}
 		
-		StringBuilder line = buildLine(2).append("System.out.println(\"").append(printValue).append("\");\n");
+		StringBuilder line = buildLine().append("System.out.println(\"").append(printValue).append("\");\n");
 		
 		code.add(line);
 	}
 	
 	public static void codeFor(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> OriginMorpList) {
-		String[] repeatRange = {"", ""};
-		String[] linePosition = {"", ""};
+		String[] repeatRange = null;
+		String[] linePosition = null;
 		
-		while(repeatRange[0].equals("")||repeatRange[1].equals("")) {
+		int[] repeatRangeNum = {0, 0};
+		int[] linePositionNum = {code.size()-1, code.size()-1};
+		
+		do {
+			repeatRange = new String[] {"", ""};
 			System.out.println("지니 : 몇 번 반복할까요?");
 			
 			System.out.print("사용자02 : ");
-			List<Morpheme> morpList = ConnectAI.connect(sc.nextLine());
+			List<Morpheme> morpList = ConnectAI.morphemeSeparation(sc.nextLine());
 			
 			find : for(int i=0; i<morpList.size(); i++) {
 				Morpheme morp = morpList.get(i);
@@ -52,7 +58,7 @@ public class CodeCommend02 {
 						repeatRange[1] = "";
 						continue find;
 					} else {
-						repeatRange[0] = "영";
+						repeatRange[0] = "null";
 						break find;
 					}
 				case "부터":
@@ -74,20 +80,71 @@ public class CodeCommend02 {
 					}
 					break;
 				}
-				
 			}
+		} while(repeatRange[0].equals("")||repeatRange[1].equals(""));
+
+		repeatRangeNum[0] = convertToNumber(repeatRange[0]);
+		repeatRangeNum[1] = convertToNumber(repeatRange[1]);
+
+		StringBuilder line = buildLine();
+		
+		if(repeatRangeNum[0]==-1)
+			line.append("for(int 귤=0; 귤<").append(repeatRangeNum[1]).append("; 귤++) {\n");
+		else
+			line.append("for(int 귤=").append(repeatRangeNum[0]).append("; 귤<=").append(repeatRangeNum[1]).append("; 귤++) {\n");
+		
+		Map<String, Object> result = null;
+		String conversationState = "";
+		String uuid = ConnectAI.openDialog();
+		
+		do {
+			System.out.println("지니 : 작업 구역을 따로 설정하시겠습니까?");
+			System.out.print("사용자02 : ");
+			result = ConnectAI.dialog(uuid);
+			conversationState = (String) result.get("state");
+		} while(!conversationState.equals("end"));
+		
+		String systemText = (String) result.get("system_text");
+		
+		if(systemText.equals(" yes\n")) {
+			linePosition = setLinePosition();
+			linePositionNum[0] = convertToNumber(linePosition[0]);
+			linePositionNum[1] = convertToNumber(linePosition[1]);
+			
+			if(linePositionNum[0]>linePositionNum[1]) {
+				int temp = linePositionNum[0];
+				linePositionNum[0] = linePositionNum[1];
+				linePositionNum[1] = temp;
+			}
+
+			if(linePositionNum[0]==-1)
+				linePositionNum[0] = linePositionNum[1];
+			
+			linePositionNum[0]--;
+			
+			for(int i=linePositionNum[0]; i<linePositionNum[1]; i++) {
+				code.get(i).insert(0, "\t");
+			}
+			
+			code.add(linePositionNum[0], line);
+			code.add(linePositionNum[1]+1, buildLine().append("}\n"));
+		}else {
+			code.add(line);
+			tapLev++;
 		}
+		
+		
 		
 	}
 	
 	public static String[] setLinePosition() {
 		String[] linePosition = {"", ""};
 		
-		while(linePosition[0].equals("")||linePosition[1].equals("")) {
+		while(linePosition[0].equals("")) {
 			System.out.println("지니 : 어디에서 작업하시겠습니까?");
 			
 			System.out.print("사용자02 : ");
-			List<Morpheme> morpList = ConnectAI.connect(sc.nextLine());
+			List<Morpheme> morpList = ConnectAI.morphemeSeparation(sc.nextLine());
 			
 			find : for(int i=0; i<morpList.size(); i++) {
 				Morpheme morp = morpList.get(i);
@@ -101,7 +158,7 @@ public class CodeCommend02 {
 						morp = morpList.get(--j);
 					}while(j>0&&!(morp.type.equals("NR")||morp.type.equals("MM")));
 					
-					String position = cutOutNum(morpList, j);
+					String position = cutOutNum(morpList, j+1);
 					
 					if(convertToNumber(position)==-1)
 						continue;
@@ -114,7 +171,6 @@ public class CodeCommend02 {
 					}
 					break;
 				}
-				
 			}
 		}
 		return linePosition;
@@ -205,9 +261,9 @@ public class CodeCommend02 {
     	return result;
     }
 	
-	public static StringBuilder buildLine(int tap) {
+	public static StringBuilder buildLine() {
     	StringBuilder line = new StringBuilder();
-    	for(int i=0; i<tap; i++) {
+    	for(int i=0; i<tapLev; i++) {
 			line.append("\t");
 		}
     	return line;

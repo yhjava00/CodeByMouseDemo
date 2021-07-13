@@ -42,9 +42,9 @@ public class CodeInWriting02 {
         		break;
         	}
 
-        	List<Morpheme> morpList = ConnectAI.connect(requestText.toString());
+        	List<Morpheme> morpList = ConnectAI.morphemeSeparation(requestText.toString());
 
-//    		codeRepeater(morpList);
+    		codeRepeater(morpList);
         }
         
         sc.close();
@@ -61,6 +61,9 @@ public class CodeInWriting02 {
     		switch (morp.text) {
 			case "출력":
 				CodeCommend02.codePrint(code, requestText, morpList);
+				break;
+			case "반복":
+				CodeCommend02.codeFor(code, requestText, morpList);
 				break;
 			}
     		
