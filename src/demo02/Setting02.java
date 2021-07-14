@@ -17,6 +17,11 @@ public class Setting02 {
     	
     	keyWordSet.add("반복");
     	
+    	keyWordSet.add("블록");
+    	
+    	keyWordSet.add("변수");
+    	
+    	keyWordSet.add("조건");
 	}
 	
 	private static void setConvertToNumberMap(Map<String, Integer> convertToNumberMap) {
@@ -59,4 +64,5 @@ public class Setting02 {
     	convertToNumberMap.put("여든", 80);
     	convertToNumberMap.put("아흔", 90);
     }
+	
 }

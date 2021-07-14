@@ -59,11 +59,20 @@ public class CodeInWriting02 {
     			continue;
     		
     		switch (morp.text) {
-			case "출력":
-				CodeCommend02.codePrint(code, requestText, morpList);
-				break;
+    		case "조건":
+    			CodeCommend02.codeCondition(code, requestText, morpList);
+    			break;
+    		case "변수":
+    			CodeCommend02.codeVariable(code, requestText, morpList);
+    			break;
+    		case "블록":
+    			CodeCommend02.codeBlock(code, requestText, morpList);
+    			break;
 			case "반복":
 				CodeCommend02.codeFor(code, requestText, morpList);
+				break;
+			case "출력":
+				CodeCommend02.codePrint(code, requestText, morpList);
 				break;
 			}
     		

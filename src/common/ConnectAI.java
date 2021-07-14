@@ -23,9 +23,8 @@ public class ConnectAI {
 	
 	static String accessKey = "";
 	
-	public static String openDialog() {
+	public static String openDialog(String domain) {
 		String openApiURL = "http://aiopen.etri.re.kr:8000/Dialog";
-        String domain = "mimir";
         String access_method = "internal_data";
         String method = "open_dialog";
         Gson gson = new Gson();
@@ -242,13 +241,13 @@ public class ConnectAI {
                 sentenceInfoList.add(sentenceInfo);
             }
 
-            System.out.println(requestText);
-            System.out.println();
+//            System.out.println(requestText);
+//            System.out.println();
             
 //            System.out.println(responBodyJson);
 //            System.out.println();
             
-            showProcessingSentence(sentenceInfoList);
+//            showProcessingSentence(sentenceInfoList);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {

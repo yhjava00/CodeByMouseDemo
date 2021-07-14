@@ -2,9 +2,11 @@ package demo02;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 import common.ConnectAI;
 import vo.Morpheme;
@@ -16,29 +18,133 @@ public class CodeCommend02 {
 	public static int tapLev = 2;
 	
 	public static Map<String, Integer> convertToNumberMap = new HashMap<>();
+	public static Set<String> variableSet = new HashSet<String>();
 	
-	public static void codePrint(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> morpList) {
+	public static void codeCalculate(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
+		String varToInclude = null;
+	}
+	
+	public static void codeCondition(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
+
+		StringBuilder line = buildLine();
 		
-		String printValue = null;
+		setLinePosition(code, line);
+	}
+	
+	public static void codeVariable(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
+		String type = null;
+		String name = null;
+		String value = null;
 		
-		if(printValue==null) {
-			System.out.println("지니 : 어떤 내용을 출력할까요?");
-			
+		if(type==null) 
+			type = variableSetType();
+		
+		if(name==null) {
+			System.out.println("지니 : 변수의 이름을 정해주세요.");
 			System.out.print("사용자02 : ");
-			printValue = sc.nextLine();
+			name = sc.nextLine();
 		}
 		
-		StringBuilder line = buildLine().append("System.out.println(\"").append(printValue).append("\");\n");
+		if(value==null) {
+			String text = "변수의 값을 설정하시겠습니까?";
+			
+			if(yesOrNo(text)) {
+				System.out.println("지니 : 변수의 값을 정해주세요.");
+				System.out.print("사용자02 : ");
+				value = sc.nextLine();
+			}
+		}
+		
+		variableSet.add(name);
+		
+		StringBuilder line = buildLine().append(type).append(name);
+		
+		if(value!=null) {
+			
+			line.append(" = ");
+			
+			int num = convertToNumber(value);
+			if(num==-1) {
+				line.append("\"").append(value).append("\"");
+			}else {
+				line.append(num);
+			}
+		}
+		
+		line.append(";\n");
+		
+		code.add(line);
+		
+	}
+	
+	private static String variableSetType() {
+		
+		String type = null;
+		Map<String, Object> result = null;
+		
+		String uuid = ConnectAI.openDialog("variableType");
+		
+		do {
+			System.out.println("지니 : 변수의 타입을 골라주세요.");
+			System.out.print("사용자02 : ");
+			result = ConnectAI.dialog(uuid);
+		}while(!((String) result.get("state")).equals("end"));
+		
+		String systemText = (String) result.get("system_text");
+		systemText = systemText.replace("\n", "");
+		
+		switch (systemText) {
+		case "정수":
+		case "정수형":
+			type = "int ";
+			break;
+		case "실수":
+		case "실수형":
+			type = "double ";
+			break;
+		case "문자":
+		case "문자형":
+			type = "String ";
+			break;
+		case "논리":
+		case "논리형":
+			type = "boolean ";
+			break;
+		}
+		
+		return type;
+	}
+	
+	public static void codeBlock(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
+		int i=0;
+		for(; i<originMorpList.size(); i++) {
+			Morpheme morp = originMorpList.get(i);
+			if(morp.text.equals("블록")) 
+				break;
+		}
+		
+		if(i+2>=originMorpList.size())
+			return;
+		
+		Morpheme actionMorpheme = originMorpList.get(i+2);
+		
+		StringBuilder line = null;
+		
+		if(actionMorpheme.text.equals("열")||actionMorpheme.text.equals("만들")) {
+			line = buildLine().append("{\n");
+			tapLev++;
+		}else {
+			tapLev--;
+			line = buildLine().append("}\n");
+		}
 		
 		code.add(line);
 	}
 	
-	public static void codeFor(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> OriginMorpList) {
+	public static void codeFor(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
 		String[] repeatRange = null;
-		String[] linePosition = null;
 		
 		int[] repeatRangeNum = {0, 0};
-		int[] linePositionNum = {code.size()-1, code.size()-1};
 		
 		do {
 			repeatRange = new String[] {"", ""};
@@ -93,51 +199,39 @@ public class CodeCommend02 {
 		else
 			line.append("for(int 귤=").append(repeatRangeNum[0]).append("; 귤<=").append(repeatRangeNum[1]).append("; 귤++) {\n");
 		
+		setLinePosition(code, line);
+	}
+	
+	private static boolean yesOrNo(String text) {
+		
 		Map<String, Object> result = null;
-		String conversationState = "";
-		String uuid = ConnectAI.openDialog();
+		String state = "";
+		
+		String uuid = ConnectAI.openDialog("yesOrNo");
 		
 		do {
-			System.out.println("지니 : 작업 구역을 따로 설정하시겠습니까?");
+			System.out.println("지니 : " + text);
 			System.out.print("사용자02 : ");
 			result = ConnectAI.dialog(uuid);
-			conversationState = (String) result.get("state");
-		} while(!conversationState.equals("end"));
+			state = (String) result.get("state");
+		} while(!state.equals("end"));
 		
 		String systemText = (String) result.get("system_text");
 		
-		if(systemText.equals(" yes\n")) {
-			linePosition = setLinePosition();
-			linePositionNum[0] = convertToNumber(linePosition[0]);
-			linePositionNum[1] = convertToNumber(linePosition[1]);
-			
-			if(linePositionNum[0]>linePositionNum[1]) {
-				int temp = linePositionNum[0];
-				linePositionNum[0] = linePositionNum[1];
-				linePositionNum[1] = temp;
-			}
-
-			if(linePositionNum[0]==-1)
-				linePositionNum[0] = linePositionNum[1];
-			
-			linePositionNum[0]--;
-			
-			for(int i=linePositionNum[0]; i<linePositionNum[1]; i++) {
-				code.get(i).insert(0, "\t");
-			}
-			
-			code.add(linePositionNum[0], line);
-			code.add(linePositionNum[1]+1, buildLine().append("}\n"));
-		}else {
-			code.add(line);
-			tapLev++;
-		}
-		
-		
-		
+		if(systemText.equals(" yes\n")) 
+			return true;
+		else
+			return false;
 	}
 	
-	public static String[] setLinePosition() {
+	public static void setLinePosition(List<StringBuilder> code, StringBuilder line) {
+		
+		if(!yesOrNo("작업 구역을 설정하시겠습니까?")) {
+			code.add(line);
+			tapLev++;
+			return;
+		}
+		
 		String[] linePosition = {"", ""};
 		
 		while(linePosition[0].equals("")) {
@@ -173,7 +267,30 @@ public class CodeCommend02 {
 				}
 			}
 		}
-		return linePosition;
+		
+
+		int[] linePositionNum = new int[2];
+		
+		linePositionNum[0] = convertToNumber(linePosition[0]);
+		linePositionNum[1] = convertToNumber(linePosition[1]);
+		
+		if(linePositionNum[0]>linePositionNum[1]) {
+			int temp = linePositionNum[0];
+			linePositionNum[0] = linePositionNum[1];
+			linePositionNum[1] = temp;
+		}
+
+		if(linePositionNum[0]==-1)
+			linePositionNum[0] = linePositionNum[1];
+		
+		linePositionNum[0]--;
+		
+		for(int i=linePositionNum[0]; i<linePositionNum[1]; i++) {
+			code.get(i).insert(0, "\t");
+		}
+		
+		code.add(linePositionNum[0], line);
+		code.add(linePositionNum[1]+1, buildLine().append("}\n"));
 	}
 	
 	public static String cutOutNum(List<Morpheme> morpList, int idx) {
@@ -190,6 +307,27 @@ public class CodeCommend02 {
 		}
 		
 		return num;
+	}
+
+	public static void codePrint(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
+		
+		String printValue = null;
+		
+		if(printValue==null) {
+			System.out.println("지니 : 어떤 내용을 출력할까요?");
+			
+			System.out.print("사용자02 : ");
+			printValue = sc.nextLine();
+		}
+		
+		StringBuilder line = buildLine().append("System.out.println(");
+		
+		if(variableSet.contains(printValue))
+			line.append(printValue).append(");\n");
+		else
+			line.append("\"").append(printValue).append("\");\n");
+		
+		code.add(line);
 	}
 	
 	public static int convertToNumber(String num) {
