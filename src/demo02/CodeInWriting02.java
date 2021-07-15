@@ -59,6 +59,12 @@ public class CodeInWriting02 {
     			continue;
     		
     		switch (morp.text) {
+    		case "스캐너":
+    			CodeCommend02.codeScanner(code, requestText, morpList);
+    			break;
+    		case "연산":
+    			CodeCommend02.codeCalculate(code, requestText, morpList);
+    			break;
     		case "조건":
     			CodeCommend02.codeCondition(code, requestText, morpList);
     			break;

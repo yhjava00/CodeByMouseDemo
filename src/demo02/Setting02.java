@@ -9,6 +9,8 @@ public class Setting02 {
 	public static void settingCodeInWriting(Set<String> keyWordSet) {
 		setKeyWord(keyWordSet);
 		setConvertToNumberMap(CodeCommend02.convertToNumberMap);
+		setOperator(CodeCommend02.operatorMap);
+		setComparisonOperator(CodeCommend02.comparisonOperatorSet);
 	}
 	
 	private static void setKeyWord(Set<String> keyWordSet) {
@@ -22,6 +24,26 @@ public class Setting02 {
     	keyWordSet.add("변수");
     	
     	keyWordSet.add("조건");
+    	
+    	keyWordSet.add("연산");
+    	
+    	keyWordSet.add("스캐너");
+	}
+	
+	private static void setComparisonOperator(Set<String> comparisonOperatorSet) {
+		comparisonOperatorSet.add("작");
+		comparisonOperatorSet.add("크");
+		comparisonOperatorSet.add("같");
+		comparisonOperatorSet.add("않");
+	}
+	
+	private static void setOperator(Map<String, String> operatorMap) {
+		operatorMap.put("더하", "+");
+		operatorMap.put("빼", "-");
+		operatorMap.put("빼주", "-");
+		operatorMap.put("나눠줘", "/");
+		operatorMap.put("곱", "*");
+		operatorMap.put("나머지", "%");
 	}
 	
 	private static void setConvertToNumberMap(Map<String, Integer> convertToNumberMap) {
