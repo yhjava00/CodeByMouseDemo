@@ -11,6 +11,7 @@ public class Setting02 {
 		setConvertToNumberMap(CodeCommend02.convertToNumberMap);
 		setOperator(CodeCommend02.operatorMap);
 		setComparisonOperator(CodeCommend02.comparisonOperatorSet);
+		setVariableType(CodeCommend02.variableTypeMap);
 	}
 	
 	private static void setKeyWord(Set<String> keyWordSet) {
@@ -30,6 +31,14 @@ public class Setting02 {
     	keyWordSet.add("스캐너");
 	}
 	
+	private static void setVariableType(Map<String, String> variableTypeMap) {
+		variableTypeMap.put("정수", "int ");
+		variableTypeMap.put("실수", "double ");
+		variableTypeMap.put("문자", "String ");
+		variableTypeMap.put("논리", "boolean ");
+		
+	}
+	
 	private static void setComparisonOperator(Set<String> comparisonOperatorSet) {
 		comparisonOperatorSet.add("작");
 		comparisonOperatorSet.add("크");
@@ -42,6 +51,7 @@ public class Setting02 {
 		operatorMap.put("빼", "-");
 		operatorMap.put("빼주", "-");
 		operatorMap.put("나눠줘", "/");
+		operatorMap.put("나누", "/");
 		operatorMap.put("곱", "*");
 		operatorMap.put("나머지", "%");
 	}

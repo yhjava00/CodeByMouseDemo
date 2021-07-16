@@ -18,9 +18,12 @@ public class CodeCommend02 {
 	private static int tapLev = 2;
 	private static boolean scannerOpen = false;
 	
-	public static Map<String, Integer> convertToNumberMap = new HashMap<>();
 	public static Map<String, String> variableMap = new HashMap<String, String>();
+	
+	public static Map<String, Integer> convertToNumberMap = new HashMap<>();
 	public static Map<String, String> operatorMap = new HashMap<String, String>();
+	public static Map<String, String> variableTypeMap = new HashMap<String, String>();
+	
 	public static Set<String> comparisonOperatorSet = new HashSet<String>();
 	
 	public static void codeScanner(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
@@ -53,12 +56,23 @@ public class CodeCommend02 {
 	private static void scannerInput(StringBuilder line, String type) {
 		switch (type) {
 		case "int":
-			line.append("키위.nextInt()");
+			line.append(" 키위.nextInt()");
 			break;
 		case "String":
-			line.append("키위.sc.nextLine()");
+			line.append(" 키위.sc.nextLine()");
 			break;
 		}
+	}
+	
+	private static String scannerInput(String type) {
+		switch (type) {
+		case "int":
+			return " 키위.nextInt()";
+		case "String":
+			return " 키위.sc.nextLine()";
+		}
+		
+		return "키위.next()";
 	}
 	
 	public static void codeCalculate(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
@@ -78,7 +92,6 @@ public class CodeCommend02 {
 		line.append(varToInclude).append(" =");
 		
 		if(scannerOpen&&yesOrNo("스캐너에서 값을 입력받으시겠습니까?")) {
-			line.append(" ");
 			scannerInput(line, type);
 		}else {
 			do {
@@ -132,7 +145,7 @@ public class CodeCommend02 {
 			for(int i=morpList.size()-1; i>=0; i--) {
 				Morpheme morp = morpList.get(i);
 				
-				if(morp.text.equals("종료")) {
+				if(morp.text.equals("종료")||morp.text.equals("반영")) {
 					return false;
 				}
 				
@@ -183,28 +196,28 @@ public class CodeCommend02 {
 			case "작":
 			case "크같않":
 			case "같크않":
-				comparisonOperator = "<";
+				comparisonOperator = " <";
 				break;
 			case "크":
 			case "작같않":
 			case "같작않":
-				comparisonOperator = ">";
+				comparisonOperator = " >";
 				break;
 			case "작같":
 			case "같작":
 			case "크않":
-				comparisonOperator = "<=";
+				comparisonOperator = " <=";
 				break;
 			case "크같":
 			case "같크":
 			case "작않":
-				comparisonOperator = ">=";
+				comparisonOperator = " >=";
 				break;
 			case "같":
-				comparisonOperator = "==";
+				comparisonOperator = " ==";
 				break;
 			case "같않":
-				comparisonOperator = "!=";
+				comparisonOperator = " !=";
 				break;
 			}
 		}
@@ -216,15 +229,18 @@ public class CodeCommend02 {
 		}while(calculateOperator(rightCondition));
 		
 
-		StringBuilder line = buildLine();
+		StringBuilder line = buildLine().append("if (").append(leftCondition).append(comparisonOperator).append(rightCondition).append(") {\n");
 		
 		setLinePosition(code, line);
 	}
 	
 	public static void codeVariable(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
-		String type = null;
-		String name = null;
-		String value = null;
+		
+		Map<String, String> varInfo = varPretreatment(originalText, originMorpList);
+		
+		String type = varInfo.get("type");
+		String name = varInfo.get("name");
+		String value = varInfo.get("value");
 		
 		if(type==null) 
 			type = setVariableType();
@@ -244,29 +260,111 @@ public class CodeCommend02 {
 			
 			if(yesOrNo(text)) {
 
-				line.append(" = ");
+				line.append(" =");
 				
 				if(scannerOpen&&yesOrNo("스캐너에서 값을 입력받으시겠습니까?")) {
 					scannerInput(line, type.trim());
 				}else {
-					System.out.println("지니 : 변수의 값을 정해주세요.");
-					System.out.print("사용자02 : ");
-					value = sc.nextLine();
+
+					do {
+						calculationTarget(line);
+					}while(calculateOperator(line));
 					
-					int num = convertToNumber(value);
-					if(num==-1) {
-						line.append("\"").append(value).append("\"");
-					}else {
-						line.append(num);
-					}
 				}
 			}
+		}else {
+			line.append(" = ").append(value);
 		}
 		
 		line.append(";\n");
 		
 		code.add(line);
 		
+	}
+	
+	private static Map<String, String> varPretreatment(StringBuilder originalText, List<Morpheme> originMorpList) {
+		
+		Map<String, String> varInfo = new HashMap<String, String>();
+		
+		Morpheme startCutMorp = null;
+		Morpheme endCutMorp = null;
+		
+		int i=0;
+		for(; i<originMorpList.size(); i++) {
+			if(originMorpList.get(i).text.equals("변수")) {
+				if(i+1<originMorpList.size()) {
+					startCutMorp = originMorpList.get(i+1);
+				}
+				break;
+			}
+		}
+		
+		String type = null;
+		
+		if(i-2>=0) {
+			type = variableTypeMap.get(originMorpList.get(i-2).text);
+			varInfo.put("type", type);
+		}
+		
+		String name = null;
+		
+		for(int j=i+1; j<originMorpList.size(); j++) {
+			endCutMorp = originMorpList.get(j);
+			if(endCutMorp.type.equals("JKB")||endCutMorp.type.equals("JKO")) {
+				endCutMorp = originMorpList.get(j);
+				int startByte = (int) startCutMorp.position;
+				int byteLength = (int) endCutMorp.position - startByte;
+				name = new String(originalText.toString().getBytes(), startByte, byteLength);
+				name = name.replace(" ", "");
+				i = j+1;
+				break;
+			}
+		}
+		
+		if(name.equals("")) 
+			name = null;
+		
+		varInfo.put("name", name);
+		
+		if(type==null&&i>=originMorpList.size())
+			return varInfo;
+		
+		String value = null;
+		
+		if(originMorpList.get(i).text.equals("입력")&&variableMap.containsKey("키위")) {
+			value = scannerInput(type.trim()).trim();
+			varInfo.put("value", value);
+			return varInfo;
+		}
+		
+		startCutMorp = originMorpList.get(i);
+		
+		for(int j=i; j<originMorpList.size(); j++) {
+			endCutMorp = originMorpList.get(j);
+			if(endCutMorp.type.equals("JKO")) {
+				endCutMorp = originMorpList.get(j);
+				int startByte = (int) startCutMorp.position;
+				int byteLength = (int) endCutMorp.position - startByte;
+				value = new String(originalText.toString().getBytes(), startByte, byteLength);
+				break;
+			}
+		}
+		
+		if(value==null)
+			return varInfo;
+		
+		if(type.equals("int ")) {
+			int conNum = convertToNumber(value); 
+			if(conNum!=-1) {
+				value = Integer.toString(conNum);
+			}else {
+				value = null;
+			}
+		}
+		
+		varInfo.put("value", value);
+		
+		return varInfo;
 	}
 	
 	private static String setVariableType() {
@@ -503,7 +601,7 @@ public class CodeCommend02 {
 
 	public static void codePrint(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
 		
-		String printValue = null;
+		String printValue = printPretreatment(originalText, originMorpList);
 		
 		if(printValue==null) {
 			System.out.println("지니 : 어떤 내용을 출력할까요?");
@@ -520,6 +618,29 @@ public class CodeCommend02 {
 			line.append("\"").append(printValue).append("\");\n");
 		
 		code.add(line);
+	}
+	
+	private static String printPretreatment(StringBuilder originalText, List<Morpheme> originMorpList) {
+		
+		String printVal = null;
+		
+		int i=0;
+		for(; i<originMorpList.size(); i++) {
+			if(originMorpList.get(i).text.equals("출력"))
+				break;
+		}
+		
+		Morpheme morp = null;
+		
+		if(i==0||!(morp = originMorpList.get(i-1)).type.equals("JKO"))
+			return printVal;
+		
+		int printValByteLen = (int) morp.position;
+		
+		printVal = new String(originalText.toString().getBytes(), 0, printValByteLen);
+		
+		return printVal.trim();
+		
 	}
 	
 	public static int convertToNumber(String num) {
@@ -598,11 +719,5 @@ public class CodeCommend02 {
 		}
     	return line;
     }
-	
-	private static void insertTap(StringBuilder line) {
-		for(int i=0; i<tapLev; i++) {
-			line.insert(0, "\t");
-		}
-	}
 	
 }
