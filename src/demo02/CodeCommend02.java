@@ -26,6 +26,37 @@ public class CodeCommend02 {
 	
 	public static Set<String> comparisonOperatorSet = new HashSet<String>();
 	
+	public static void codeArrangement(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
+		String type = null;
+		String name = null;
+		int length = -1;
+		
+		if(type==null)
+			type = setVariableType("지니 : 배열의 타입을 골라주세요.").trim();
+		
+		while(name==null||variableMap.containsKey(name)) {
+			System.out.println("지니 : 배열의 이름을 정해주세요.");
+			System.out.print("사용자 : ");
+			name = sc.nextLine();
+		}
+		
+		variableMap.put(name, type + "[]");
+		
+		while(length==-1) {
+			System.out.println("지니 : 배열의 길이를 정해주세요.");
+			System.out.print("사용자 : ");
+			length = convertToNumber(sc.nextLine());
+		}
+		
+		StringBuilder line = buildLine().append(type).append("[] ").append(name).append(" = ").append(type).append("[").append(length).append("];\n");
+		
+		code.add(line);
+	}
+	
+	public static void codeMethod() {
+		
+	}
+
 	public static void codeScanner(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
 		StringBuilder line = buildLine();
 		
@@ -243,7 +274,7 @@ public class CodeCommend02 {
 		String value = varInfo.get("value");
 		
 		if(type==null) 
-			type = setVariableType();
+			type = setVariableType("지니 : 변수의 타입을 골라주세요.");
 		
 		if(name==null) {
 			System.out.println("지니 : 변수의 이름을 정해주세요.");
@@ -367,7 +398,7 @@ public class CodeCommend02 {
 		return varInfo;
 	}
 	
-	private static String setVariableType() {
+	private static String setVariableType(String text) {
 		
 		String type = null;
 		Map<String, Object> result = null;
@@ -375,7 +406,7 @@ public class CodeCommend02 {
 		String uuid = ConnectAI.openDialog("variableType");
 		
 		do {
-			System.out.println("지니 : 변수의 타입을 골라주세요.");
+			System.out.println(text);
 			System.out.print("사용자02 : ");
 			result = ConnectAI.dialog(uuid);
 		}while(!((String) result.get("state")).equals("end"));

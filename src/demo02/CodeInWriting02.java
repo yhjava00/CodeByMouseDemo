@@ -59,6 +59,14 @@ public class CodeInWriting02 {
     			continue;
     		
     		switch (morp.text) {
+    		case "배열":
+    			CodeCommend02.codeArrangement(code, requestText, morpList);
+    			break;
+    		case "함수":
+    		case "메서드":
+    		case "메소드":
+    			CodeCommend02.codeMethod();
+    			break;
     		case "스캐너":
     			CodeCommend02.codeScanner(code, requestText, morpList);
     			break;

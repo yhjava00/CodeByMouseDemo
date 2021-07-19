@@ -29,6 +29,13 @@ public class Setting02 {
     	keyWordSet.add("연산");
     	
     	keyWordSet.add("스캐너");
+    	
+    	keyWordSet.add("배열");
+    	
+    	keyWordSet.add("함수");
+    	keyWordSet.add("메서드");
+    	keyWordSet.add("메소드");
+    	
 	}
 	
 	private static void setVariableType(Map<String, String> variableTypeMap) {
