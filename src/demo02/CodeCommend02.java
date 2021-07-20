@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Stack;
 
 import common.ConnectAI;
 import vo.Morpheme;
@@ -17,6 +18,8 @@ public class CodeCommend02 {
 	
 	private static int tapLev = 2;
 	private static boolean scannerOpen = false;
+	
+	private static Stack<String> blockStack = new Stack<String>();
 	
 	public static Map<String, String> variableMap = new HashMap<String, String>();
 	
@@ -120,7 +123,19 @@ public class CodeCommend02 {
 		
 		String type = variableMap.get(varToInclude);
 		
-		line.append(varToInclude).append(" =");
+		line.append(varToInclude);
+		
+		if(type.contains("[]")) {
+			int idx = -1;
+			do {
+				System.out.println("지니 : 몇 번째 인덱스에 담으시겠습니까?");
+				System.out.print("사용자02 : ");
+				idx = convertToNumber(sc.nextLine());
+			}while(idx==-1);
+			line.append("[").append(idx).append("]");
+		}
+		
+		line.append(" =");
 		
 		if(scannerOpen&&yesOrNo("스캐너에서 값을 입력받으시겠습니까?")) {
 			scannerInput(line, type);
@@ -196,7 +211,7 @@ public class CodeCommend02 {
 		}
 	}
 	
-	public static void codeCondition(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
+	public static String codeCondition(List<StringBuilder> code, boolean checkPostion) {
 		
 		String comparisonOperator = null;
 		StringBuilder leftCondition = new StringBuilder();
@@ -259,10 +274,14 @@ public class CodeCommend02 {
 			calculationTarget(rightCondition);
 		}while(calculateOperator(rightCondition));
 		
-
+		blockStack.add("condition");
+		
 		StringBuilder line = buildLine().append("if (").append(leftCondition).append(comparisonOperator).append(rightCondition).append(") {\n");
 		
-		setLinePosition(code, line);
+		if(checkPostion)
+			setLinePosition(code, line);
+		
+		return line.toString();
 	}
 	
 	public static void codeVariable(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
@@ -357,12 +376,12 @@ public class CodeCommend02 {
 		
 		varInfo.put("name", name);
 		
-		if(type==null&&i>=originMorpList.size())
+		if(type==null||i>=originMorpList.size())
 			return varInfo;
 		
 		String value = null;
 		
-		if(originMorpList.get(i).text.equals("입력")&&variableMap.containsKey("키위")) {
+		if(originMorpList.get(i).text.equals("입력")&&scannerOpen) {
 			value = scannerInput(type.trim()).trim();
 			varInfo.put("value", value);
 			return varInfo;
@@ -452,11 +471,25 @@ public class CodeCommend02 {
 		StringBuilder line = null;
 		
 		if(actionMorpheme.text.equals("열")||actionMorpheme.text.equals("만들")) {
+			blockStack.add("none");
 			line = buildLine().append("{\n");
 			tapLev++;
 		}else {
 			tapLev--;
-			line = buildLine().append("}\n");
+			line = buildLine().append("}");
+			String beforeBlock = blockStack.pop();
+			if(beforeBlock.equals("condition")&&yesOrNo("조건이 거짓일때 실행할 블록을 만드시겠습니까?")) {
+				tapLev++;
+				blockStack.add("condition");
+				line.append(" else ");
+				if(yesOrNo("조건을 추가하시겠습니까?")) {
+					line.append(codeCondition(code, false));
+				}else {
+					line.append("{\n");
+				}
+			}else {
+				line.append("\n");
+			}
 		}
 		
 		code.add(line);
@@ -520,6 +553,8 @@ public class CodeCommend02 {
 		else
 			line.append("for(int 귤=").append(repeatRangeNum[0]).append("; 귤<=").append(repeatRangeNum[1]).append("; 귤++) {\n");
 		
+		blockStack.add("for");
+		
 		setLinePosition(code, line);
 	}
 	
@@ -552,6 +587,8 @@ public class CodeCommend02 {
 			tapLev++;
 			return;
 		}
+		
+		blockStack.pop();
 		
 		String[] linePosition = {"", ""};
 		
@@ -639,6 +676,13 @@ public class CodeCommend02 {
 			
 			System.out.print("사용자02 : ");
 			printValue = sc.nextLine();
+		}
+		
+		if(printValue.contains("마이너스")) {
+			int temp = convertToNumber(printValue.replace("마이너스", "").trim());
+			if(temp!=-1) {
+				printValue = String.valueOf(-temp);
+			}
 		}
 		
 		StringBuilder line = buildLine().append("System.out.println(");

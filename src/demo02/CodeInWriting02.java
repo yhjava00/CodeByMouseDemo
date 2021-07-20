@@ -74,7 +74,7 @@ public class CodeInWriting02 {
     			CodeCommend02.codeCalculate(code, requestText, morpList);
     			break;
     		case "조건":
-    			CodeCommend02.codeCondition(code, requestText, morpList);
+    			CodeCommend02.codeCondition(code, true);
     			break;
     		case "변수":
     			CodeCommend02.codeVariable(code, requestText, morpList);
