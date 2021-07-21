@@ -211,7 +211,7 @@ public class CodeCommend02 {
 		}
 	}
 	
-	public static String codeCondition(List<StringBuilder> code, boolean checkPostion) {
+	public static String codeCondition(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
 		
 		String comparisonOperator = null;
 		StringBuilder leftCondition = new StringBuilder();
@@ -277,9 +277,9 @@ public class CodeCommend02 {
 		blockStack.add("condition");
 		
 		StringBuilder line = buildLine().append("if (").append(leftCondition).append(comparisonOperator).append(rightCondition).append(") {\n");
-		
-		if(checkPostion)
-			setLinePosition(code, line);
+
+		tapLev++;
+		code.add(line);
 		
 		return line.toString();
 	}
@@ -480,11 +480,12 @@ public class CodeCommend02 {
 			String beforeBlock = blockStack.pop();
 			if(beforeBlock.equals("condition")&&yesOrNo("조건이 거짓일때 실행할 블록을 만드시겠습니까?")) {
 				tapLev++;
-				blockStack.add("condition");
 				line.append(" else ");
 				if(yesOrNo("조건을 추가하시겠습니까?")) {
-					line.append(codeCondition(code, false));
+					blockStack.add("condition");
+					line.append(codeCondition(code, originalText, originMorpList));
 				}else {
+					blockStack.add("else");
 					line.append("{\n");
 				}
 			}else {
@@ -555,7 +556,8 @@ public class CodeCommend02 {
 		
 		blockStack.add("for");
 		
-		setLinePosition(code, line);
+		tapLev++;
+		code.add(line);
 	}
 	
 	private static boolean yesOrNo(String text) {
@@ -580,76 +582,76 @@ public class CodeCommend02 {
 			return false;
 	}
 	
-	public static void setLinePosition(List<StringBuilder> code, StringBuilder line) {
-		
-		if(!yesOrNo("작업 구역을 설정하시겠습니까?")) {
-			code.add(line);
-			tapLev++;
-			return;
-		}
-		
-		blockStack.pop();
-		
-		String[] linePosition = {"", ""};
-		
-		while(linePosition[0].equals("")) {
-			System.out.println("지니 : 어디에서 작업하시겠습니까?");
-			
-			System.out.print("사용자02 : ");
-			List<Morpheme> morpList = ConnectAI.morphemeSeparation(sc.nextLine());
-			
-			find : for(int i=0; i<morpList.size(); i++) {
-				Morpheme morp = morpList.get(i);
-				
-				switch (morp.text) {
-				case "줄":
-					int j=i;
-					if(j<1)
-						break;
-					do {
-						morp = morpList.get(--j);
-					}while(j>0&&!(morp.type.equals("NR")||morp.type.equals("MM")));
-					
-					String position = cutOutNum(morpList, j+1);
-					
-					if(convertToNumber(position)==-1)
-						continue;
-					
-					if(linePosition[0].equals("")) {
-						linePosition[0] = position;
-					}else {
-						linePosition[1] = position;
-						break find;
-					}
-					break;
-				}
-			}
-		}
-		
-
-		int[] linePositionNum = new int[2];
-		
-		linePositionNum[0] = convertToNumber(linePosition[0]);
-		linePositionNum[1] = convertToNumber(linePosition[1]);
-		
-		if(linePositionNum[0]>linePositionNum[1]) {
-			int temp = linePositionNum[0];
-			linePositionNum[0] = linePositionNum[1];
-			linePositionNum[1] = temp;
-		}
-
-		if(linePositionNum[0]==-1)
-			linePositionNum[0] = linePositionNum[1];
-		
-		linePositionNum[0]--;
-		
-		for(int i=linePositionNum[0]; i<linePositionNum[1]; i++) {
-			code.get(i).insert(0, "\t");
-		}
-		
-		code.add(linePositionNum[0], line);
-		code.add(linePositionNum[1]+1, buildLine().append("}\n"));
-	}
+//	public static void setLinePosition(List<StringBuilder> code, StringBuilder line) {
+//		
+//		if(!yesOrNo("작업 구역을 설정하시겠습니까?")) {
+//			code.add(line);
+//			tapLev++;
+//			return;
+//		}
+//		
+//		blockStack.pop();
+//		
+//		String[] linePosition = {"", ""};
+//		
+//		while(linePosition[0].equals("")) {
+//			System.out.println("지니 : 어디에서 작업하시겠습니까?");
+//			
+//			System.out.print("사용자02 : ");
+//			List<Morpheme> morpList = ConnectAI.morphemeSeparation(sc.nextLine());
+//			
+//			find : for(int i=0; i<morpList.size(); i++) {
+//				Morpheme morp = morpList.get(i);
+//				
+//				switch (morp.text) {
+//				case "줄":
+//					int j=i;
+//					if(j<1)
+//						break;
+//					do {
+//						morp = morpList.get(--j);
+//					}while(j>0&&!(morp.type.equals("NR")||morp.type.equals("MM")));
+//					
+//					String position = cutOutNum(morpList, j+1);
+//					
+//					if(convertToNumber(position)==-1)
+//						continue;
+//					
+//					if(linePosition[0].equals("")) {
+//						linePosition[0] = position;
+//					}else {
+//						linePosition[1] = position;
+//						break find;
+//					}
+//					break;
+//				}
+//			}
+//		}
+//		
+//
+//		int[] linePositionNum = new int[2];
+//		
+//		linePositionNum[0] = convertToNumber(linePosition[0]);
+//		linePositionNum[1] = convertToNumber(linePosition[1]);
+//		
+//		if(linePositionNum[0]>linePositionNum[1]) {
+//			int temp = linePositionNum[0];
+//			linePositionNum[0] = linePositionNum[1];
+//			linePositionNum[1] = temp;
+//		}
+//
+//		if(linePositionNum[0]==-1)
+//			linePositionNum[0] = linePositionNum[1];
+//		
+//		linePositionNum[0]--;
+//		
+//		for(int i=linePositionNum[0]; i<linePositionNum[1]; i++) {
+//			code.get(i).insert(0, "\t");
+//		}
+//		
+//		code.add(linePositionNum[0], line);
+//		code.add(linePositionNum[1]+1, buildLine().append("}\n"));
+//	}
 	
 	public static String cutOutNum(List<Morpheme> morpList, int idx) {
 		String num = "";

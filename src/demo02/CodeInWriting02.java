@@ -39,6 +39,13 @@ public class CodeInWriting02 {
         	requestText.append(sc.nextLine());
         	
         	if(requestText.toString().equals("종료")) {
+        		StringBuilder finalCode = new StringBuilder();
+        		for(int i=0; i<code.size(); i++) {
+        			finalCode.append(code.get(i).toString());
+        		}
+        		finalCode.append("\t}\n");
+        		finalCode.append("}\n");
+        		System.out.println(finalCode);
         		break;
         	}
 
@@ -74,7 +81,7 @@ public class CodeInWriting02 {
     			CodeCommend02.codeCalculate(code, requestText, morpList);
     			break;
     		case "조건":
-    			CodeCommend02.codeCondition(code, true);
+    			CodeCommend02.codeCondition(code, requestText, morpList);
     			break;
     		case "변수":
     			CodeCommend02.codeVariable(code, requestText, morpList);
