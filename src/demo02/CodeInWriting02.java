@@ -10,6 +10,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import common.ConnectAI;
+import launcher.CodeLauncher;
 import vo.Morpheme;
 
 public class CodeInWriting02 {
@@ -56,6 +57,10 @@ public class CodeInWriting02 {
         
         sc.close();
         
+        System.out.println("Code Result >>");
+		CodeLauncher launcher = new CodeLauncher();
+		launcher.codeExecution(CodeCommend02.launcherInfoList);
+        
     }
     
     private static void codeRepeater(List<Morpheme> morpList) {
@@ -97,8 +102,8 @@ public class CodeInWriting02 {
 				break;
 			}
     		
-    		
     		showCode();
+    		
     	}
     }
     

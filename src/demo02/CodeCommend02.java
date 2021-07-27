@@ -11,10 +11,13 @@ import java.util.Stack;
 
 import common.ConnectAI;
 import vo.Morpheme;
+import vo.Variable;
 
 public class CodeCommend02 {
 
 	private static Scanner sc = new Scanner(System.in);
+	
+	public static List<Map<String, Object>> launcherInfoList = new ArrayList<Map<String,Object>>();
 	
 	private static int tapLev = 2;
 	private static boolean scannerOpen = false;
@@ -87,7 +90,7 @@ public class CodeCommend02 {
 		code.add(line);
 	}
 	
-	private static void scannerInput(StringBuilder line, String type) {
+	private static String scannerInput(StringBuilder line, String type) {
 		switch (type) {
 		case "int":
 			line.append(" 키위.nextInt()");
@@ -96,6 +99,7 @@ public class CodeCommend02 {
 			line.append(" 키위.sc.nextLine()");
 			break;
 		}
+		return "//input";
 	}
 	
 	private static String scannerInput(String type) {
@@ -213,7 +217,7 @@ public class CodeCommend02 {
 	
 	public static void codeCondition(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
 		
-		blockStack.add("condition");
+		blockStack.add("if");
 		
 		StringBuilder condition = new StringBuilder();
 		
@@ -348,18 +352,28 @@ public class CodeCommend02 {
 				line.append(" =");
 				
 				if(scannerOpen&&yesOrNo("스캐너에서 값을 입력받으시겠습니까?")) {
-					scannerInput(line, type.trim());
+					value = scannerInput(line, type.trim());
 				}else {
-
+					StringBuilder valueBuilder = new StringBuilder();
 					do {
-						calculationTarget(line);
-					}while(calculateOperator(line));
+						calculationTarget(valueBuilder);
+					}while(calculateOperator(valueBuilder));
 					
+					value = valueBuilder.toString().trim();
+					
+					line.append(valueBuilder);
 				}
 			}
 		}else {
 			line.append(" = ").append(value);
 		}
+		
+		Map<String, Object> launcherInfo = new HashMap<String, Object>();
+		
+		launcherInfo.put("action", "createVar");
+		launcherInfo.put("variable", new Variable(type.trim(), name, value));
+		
+		launcherInfoList.add(launcherInfo);
 		
 		line.append(";\n");
 		
@@ -513,13 +527,17 @@ public class CodeCommend02 {
 			tapLev--;
 			line = buildLine().append("}");
 			String beforeBlock = blockStack.pop();
-			if(beforeBlock.equals("condition")&&yesOrNo("조건이 거짓일때 실행할 블록을 만드시겠습니까?")) {
+			Map<String, Object> launcherInfo = new HashMap<String, Object>();
+			launcherInfo.put("action", "out " + beforeBlock);
+			
+			launcherInfoList.add(launcherInfo);
+			if(beforeBlock.equals("if")&&yesOrNo("조건이 거짓일때 실행할 블록을 만드시겠습니까?")) {
 				tapLev++;
 				line.append(" else ");
 				if(yesOrNo("조건을 추가하시겠습니까?")) {
 					line.append("if (");
 
-					blockStack.add("condition");
+					blockStack.add("if");
 					StringBuilder condition = new StringBuilder();
 					
 					do {
@@ -540,10 +558,26 @@ public class CodeCommend02 {
 		code.add(line);
 	}
 	
+	public static void codeWhile(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
+		
+		blockStack.add("while");
+		
+		String condition = buildCondition();
+		
+		StringBuilder line = buildLine().append("while ( ").append(condition).append(" ) {\n");
+		tapLev++;
+		code.add(line);
+	}
+	
 	public static void codeFor(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
 		String[] repeatRange = null;
 		
 		int[] repeatRangeNum = {0, 0};
+		
+		if(yesOrNo("while문으로 만드시겠습니까?")) {
+			codeWhile(code, originalText, originMorpList);
+			return;
+		}
 		
 		do {
 			repeatRange = new String[] {"", ""};
@@ -563,7 +597,7 @@ public class CodeCommend02 {
 						repeatRange[1] = "";
 						continue find;
 					} else {
-						repeatRange[0] = "null";
+						repeatRange[0] = "일";
 						break find;
 					}
 				case "부터":
@@ -594,11 +628,19 @@ public class CodeCommend02 {
 		StringBuilder line = buildLine();
 		
 		if(repeatRangeNum[0]==-1)
-			line.append("for(int 귤=0; 귤<").append(repeatRangeNum[1]).append("; 귤++) {\n");
+			line.append("for(int 귤=1; 귤<=").append(repeatRangeNum[1]).append("; 귤++) {\n");
 		else
 			line.append("for(int 귤=").append(repeatRangeNum[0]).append("; 귤<=").append(repeatRangeNum[1]).append("; 귤++) {\n");
 		
 		blockStack.add("for");
+		
+		Map<String, Object> launcherInfo = new HashMap<String, Object>();
+		
+		launcherInfo.put("action", "for");
+		launcherInfo.put("start", repeatRangeNum[0]);
+		launcherInfo.put("end", repeatRangeNum[1]);
+		
+		launcherInfoList.add(launcherInfo);
 		
 		tapLev++;
 		code.add(line);
@@ -643,6 +685,8 @@ public class CodeCommend02 {
 	}
 
 	public static void codePrint(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
+
+		Map<String, Object> launcherInfo = new HashMap<String, Object>();
 		
 		String printValue = printPretreatment(originalText, originMorpList);
 		StringBuilder calculatePrint = null;
@@ -654,6 +698,7 @@ public class CodeCommend02 {
 					calculationTarget(calculatePrint);
 				}while(calculateOperator(calculatePrint));
 				printValue = calculatePrint.toString().trim();
+				launcherInfo.put("cal", null);
 			}else {
 				System.out.println("지니 : 어떤 내용을 출력할까요?");
 				
@@ -678,6 +723,12 @@ public class CodeCommend02 {
 			line.append("\"").append(printValue).append("\");\n");
 		
 		code.add(line);
+
+		launcherInfo.put("action", "print");
+		launcherInfo.put("value", printValue);
+		
+		launcherInfoList.add(launcherInfo);
+		
 	}
 	
 	private static String printPretreatment(StringBuilder originalText, List<Morpheme> originMorpList) {
