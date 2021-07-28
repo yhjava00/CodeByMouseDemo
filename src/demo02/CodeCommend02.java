@@ -115,6 +115,10 @@ public class CodeCommend02 {
 	
 	public static void codeCalculate(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
 		
+		Map<String, Object> launcherInfo = new HashMap<String, Object>();
+		
+		launcherInfo.put("action", "cal");
+		
 		StringBuilder line = buildLine();
 		
 		String varToInclude = null;
@@ -144,10 +148,17 @@ public class CodeCommend02 {
 		if(scannerOpen&&yesOrNo("스캐너에서 값을 입력받으시겠습니까?")) {
 			scannerInput(line, type);
 		}else {
+			StringBuilder cal = new StringBuilder();
 			do {
-				calculationTarget(line);
-			}while(calculateOperator(line));
+				calculationTarget(cal);
+			}while(calculateOperator(cal));
+			
+			launcherInfo.put("cal", cal.toString().trim());
+			
+			line.append(cal);
 		}
+		
+		launcherInfoList.add(launcherInfo);
 		
 		line.append(";\n");
 		code.add(line);
@@ -563,6 +574,13 @@ public class CodeCommend02 {
 		blockStack.add("while");
 		
 		String condition = buildCondition();
+		
+		Map<String, Object> launcherInfo = new HashMap<String, Object>();
+		
+		launcherInfo.put("action", "while");
+		launcherInfo.put("condition", condition);
+		
+		launcherInfoList.add(launcherInfo);
 		
 		StringBuilder line = buildLine().append("while ( ").append(condition).append(" ) {\n");
 		tapLev++;

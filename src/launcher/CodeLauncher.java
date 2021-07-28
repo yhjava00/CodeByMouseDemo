@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import vo.Variable;
 
@@ -19,35 +21,76 @@ public class CodeLauncher {
 	
 	public void codeExecution(List<Map<String, Object>> launcherInfoList) {
 	
-//		for(Map<String, Object> info : launcherInfoList) {
-		for(int i=0; i<launcherInfoList.size(); i++) {
-			
-			Map<String, Object> info = launcherInfoList.get(i);
-			
-			switch ((String) info.get("action")) {
-			case "for":
-				try {
+		try {
+			for(int i=0; i<launcherInfoList.size(); i++) {
+				
+				Map<String, Object> info = launcherInfoList.get(i);
+				
+				switch ((String) info.get("action")) {
+				case "cal":
+					actionCalculate(info);
+					break;
+				case "while":
+					i = actionWhile(info, launcherInfoList, i);
+					break;
+				case "for":
 					i = actionFor(info, launcherInfoList, i);
-				} catch (Exception e) {
-					System.out.println("ERR for");
-				}
-				break;
-			case "print":
-				try {
+					break;
+				case "print":
 					actionPrint(info);
-				} catch (Exception e) {
-					System.out.println("ERR print");
-				}
-				break;
-			case "createVar":
-				try {
+					break;
+				case "createVar":
 					actionCreateVar(info);
-				} catch (Exception e) {
-					System.out.println("ERR create val");
+					break;
 				}
+			}
+		} catch (Exception e) {
+			System.out.println("ERR");
+		}
+	}
+	
+	private void actionCalculate(Map<String, Object> info) throws Exception {
+		String varName = (String) info.get("var");
+		String cal = (String) info.get("cal");
+		
+		Variable var = variableMap.get(varName);
+		
+		var.value = String.valueOf((int) engine.eval(putVariable(cal)));
+	}
+	
+	private int actionWhile(Map<String, Object> info, List<Map<String, Object>> launcherInfoList, int idx) throws Exception {
+		String condition = (String) info.get("condition");
+		
+		List<Map<String, Object>> whileList = new ArrayList<Map<String,Object>>();
+
+		idx++;
+		for(;idx<launcherInfoList.size(); idx++) {
+			Map<String, Object> whileInfo = launcherInfoList.get(idx);
+			if(((String) whileInfo.get("action")).equals("out while")) {
 				break;
 			}
+			whileList.add(whileInfo);
 		}
+
+		while((boolean) engine.eval(putVariable(condition))) {
+			codeExecution(whileList);
+		}
+		
+		return ++idx;
+	}
+	
+	private String putVariable(String put) {
+		StringTokenizer st = new StringTokenizer(put);
+		
+		while(st.hasMoreTokens()) {
+			String piece = st.nextToken();
+			if(variableMap.containsKey(piece)) {
+				Variable var = variableMap.get(piece);
+				put = put.replace(piece, var.value);
+			}
+		}
+		
+		return put;
 	}
 	
 	private int actionFor(Map<String, Object> info, List<Map<String, Object>> launcherInfoList, int idx) throws Exception {
