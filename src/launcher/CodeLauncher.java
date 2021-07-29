@@ -19,6 +19,11 @@ public class CodeLauncher {
 	ScriptEngineManager s = new ScriptEngineManager();
 	ScriptEngine engine = s.getEngineByName("JavaScript");
 	
+	public void showExecution(List<Map<String, Object>> launcherInfoList) {
+		for(Map<String, Object> launcherInfo : launcherInfoList)
+			System.out.println(launcherInfo);
+	}
+	
 	public void codeExecution(List<Map<String, Object>> launcherInfoList) {
 	
 		try {
@@ -42,11 +47,62 @@ public class CodeLauncher {
 				case "createVar":
 					actionCreateVar(info);
 					break;
+				case "if":
+					i = actionCondition(info, launcherInfoList, i);
+					break;
 				}
 			}
 		} catch (Exception e) {
-			System.out.println("ERR");
+			e.printStackTrace();
+			System.exit(0);
 		}
+	}
+	
+	private int actionCondition(Map<String, Object> info, List<Map<String, Object>> launcherInfoList, int idx) throws Exception {
+		String condition = (String) info.get("condition");
+		
+		List<Map<String, Object>> conditionList = new ArrayList<Map<String,Object>>();
+
+		idx++;
+		for(;idx<launcherInfoList.size(); idx++) {
+			Map<String, Object> conditionInfo = launcherInfoList.get(idx);
+			if(((String) conditionInfo.get("action")).equals("out if")) {
+				break;
+			}
+			conditionList.add(conditionInfo);
+		}
+
+		List<Map<String, Object>> elseList = new ArrayList<Map<String,Object>>();
+
+		if(++idx<launcherInfoList.size()&&((String) launcherInfoList.get(idx).get("action")).equals("else")) {
+			int conditionCnt = 0;
+			
+			idx++;
+			for(;idx<launcherInfoList.size(); idx++) {
+				Map<String, Object> elseInfo = launcherInfoList.get(idx);
+				String action = (String) elseInfo.get("action");
+				if(action.equals("out else")&&conditionCnt--<=0) {
+					break;
+				}
+				if(action.equals("if")) {
+					conditionCnt++;
+				}
+				conditionList.add(elseInfo);
+			}
+		}
+		
+		if(elseList.size()==0) {
+			idx--;
+		}
+		
+		if((boolean) engine.eval(putVariable(condition))) {
+			codeExecution(conditionList);
+		}else {
+			codeExecution(elseList);
+		}
+		System.out.println(conditionList);
+		System.out.println(elseList);
+		return ++idx;
 	}
 	
 	private void actionCalculate(Map<String, Object> info) throws Exception {

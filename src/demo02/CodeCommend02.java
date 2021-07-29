@@ -127,6 +127,7 @@ public class CodeCommend02 {
 			System.out.println("지니 : 연산 결과를 담을 변수를 설정해주세요.");
 			System.out.print("사용자02 : ");
 			varToInclude = sc.nextLine();
+			launcherInfo.put("var", varToInclude);
 		}
 		
 		String type = variableMap.get(varToInclude);
@@ -238,6 +239,8 @@ public class CodeCommend02 {
 		
 		StringBuilder line = buildLine().append("if (").append(condition).append(" ) {\n");
 
+		inputLauncherAction("if").put("condition", condition.toString().trim());
+		
 		tapLev++;
 		code.add(line);
 	}
@@ -516,6 +519,7 @@ public class CodeCommend02 {
 	}
 	
 	public static void codeBlock(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
+		
 		int i=0;
 		for(; i<originMorpList.size(); i++) {
 			Morpheme morp = originMorpList.get(i);
@@ -538,14 +542,19 @@ public class CodeCommend02 {
 			tapLev--;
 			line = buildLine().append("}");
 			String beforeBlock = blockStack.pop();
-			Map<String, Object> launcherInfo = new HashMap<String, Object>();
-			launcherInfo.put("action", "out " + beforeBlock);
 			
-			launcherInfoList.add(launcherInfo);
+			inputLauncherAction("out " + beforeBlock);
+			
 			if(beforeBlock.equals("if")&&yesOrNo("조건이 거짓일때 실행할 블록을 만드시겠습니까?")) {
+				
+				inputLauncherAction("else");
+				
 				tapLev++;
 				line.append(" else ");
 				if(yesOrNo("조건을 추가하시겠습니까?")) {
+					
+					Map<String, Object> launcherConditionInfo = inputLauncherAction("if");
+					
 					line.append("if (");
 
 					blockStack.add("if");
@@ -554,6 +563,8 @@ public class CodeCommend02 {
 					do {
 						condition.append(buildCondition());
 					}while(yesOrNo("조건을 추가하시겠습니까?")&&areYouSureAddACondition(condition));
+					
+					launcherConditionInfo.put("condition", condition.toString().trim());
 					
 					line.append(condition).append(" ) ");
 					
@@ -848,5 +859,14 @@ public class CodeCommend02 {
 		}
     	return line;
     }
+	
+	private static Map<String, Object> inputLauncherAction(String action) {
+		Map<String, Object> launcherInfo = new HashMap<String, Object>();
+		
+		launcherInfo.put("action", action);
+		launcherInfoList.add(launcherInfo);
+		
+		return launcherInfo;
+	}
 	
 }
