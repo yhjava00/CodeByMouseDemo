@@ -16,9 +16,19 @@ public class Main {
 //			e.printStackTrace();
 //		}
 		
-		int i=10;
-		for(; i<5; i++) {
-			System.out.println(123);
+		
+		for(int i=1; i<=5; i++) {
+			if(i==1) {
+				System.out.println("hello");
+			}else if(i==2) {
+				System.out.println("nice");
+			}else if(i==3) {
+				System.out.println("to");
+			}else if(i==4) {
+				System.out.println("meet");
+			}else {
+				System.out.println("you");
+			}
 		}
 		
 	}

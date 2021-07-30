@@ -10,6 +10,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import demo02.CodeCommend02;
 import vo.Variable;
 
 public class CodeLauncher {
@@ -19,9 +20,17 @@ public class CodeLauncher {
 	ScriptEngineManager s = new ScriptEngineManager();
 	ScriptEngine engine = s.getEngineByName("JavaScript");
 	
+	StringTokenizer inputToken;
+	
+	public CodeLauncher(StringTokenizer inputToken) {
+		this.inputToken = inputToken;
+	}
+	
 	public void showExecution(List<Map<String, Object>> launcherInfoList) {
+		System.out.println();
 		for(Map<String, Object> launcherInfo : launcherInfoList)
 			System.out.println(launcherInfo);
+		System.out.println();
 	}
 	
 	public void codeExecution(List<Map<String, Object>> launcherInfoList) {
@@ -50,12 +59,20 @@ public class CodeLauncher {
 				case "if":
 					i = actionCondition(info, launcherInfoList, i);
 					break;
+				case "input":
+					actionInput(info);
+					break;
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
 		}
+	}
+	
+	private void actionInput(Map<String, Object> info) throws Exception {
+		String varName = (String) info.get("var");
+		variableMap.get(varName).value = inputToken.nextToken();
 	}
 	
 	private int actionCondition(Map<String, Object> info, List<Map<String, Object>> launcherInfoList, int idx) throws Exception {
@@ -87,7 +104,7 @@ public class CodeLauncher {
 				if(action.equals("if")) {
 					conditionCnt++;
 				}
-				conditionList.add(elseInfo);
+				elseList.add(elseInfo);
 			}
 		}
 		
@@ -100,8 +117,7 @@ public class CodeLauncher {
 		}else {
 			codeExecution(elseList);
 		}
-		System.out.println(conditionList);
-		System.out.println(elseList);
+		
 		return ++idx;
 	}
 	
@@ -166,6 +182,8 @@ public class CodeLauncher {
 		}
 		
 		for(int i=start; i<=end; i++) {
+			Variable var = variableMap.get("귤");
+			var.value = String.valueOf(i);
 			codeExecution(forList);
 		}
 		
@@ -174,6 +192,10 @@ public class CodeLauncher {
 	
 	private void actionCreateVar(Map<String, Object> info) throws Exception {
 		Variable var = (Variable) info.get("variable");
+		
+		if(var.value.equals("input")) {
+			var.value = inputToken.nextToken();
+		}
 		
 		if(var.value!=null) {
 			switch (var.type) {
@@ -192,8 +214,10 @@ public class CodeLauncher {
 	private void actionPrint(Map<String, Object> info) throws Exception {
 		String value = (String) info.get("value");
 		
+		System.out.println(value);
+		
 		if(info.containsKey("cal")) {
-			value = String.valueOf((int) engine.eval(value));
+			value = String.valueOf(engine.eval(putVariable(value)));
 		}
 		
 		if(variableMap.containsKey(value)) {

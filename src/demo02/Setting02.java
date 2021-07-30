@@ -3,6 +3,7 @@ package demo02;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 public class Setting02 {
     
@@ -12,6 +13,14 @@ public class Setting02 {
 		setOperator(CodeCommend02.operatorMap);
 		setComparisonOperator(CodeCommend02.comparisonOperatorSet);
 		setVariableType(CodeCommend02.variableTypeMap);
+		
+		CodeCommend02.commendToken = new StringTokenizer("스캐너를 열어줘/정수형 변수 알파를 만들어줘/응/응/조건/알파/반영/같으면/사/반영/응/또는/알파/반영/같으면/칠/반영/아니/마이너스 일을 출력해줘/블록을 나가/응/응/알파/나눈 나머지/오/반영/같으면/영/반영/아니/출력해줘/응/알파/나누기/오/반영/블록을 나가/응/응/알파/나눈 나머지/오/반영/같으면/일/반영/응/또는/알파/나눈 나머지/오/반영/같으면/삼/반영/아니/출력해줘/응/괄호/알파/나누기/오/괄호/더하기/일/반영/블록을 나가/응/응/알파/나눈 나머지/오/반영/같으면/이/반영/응/또는/알파/나눈 나머지/오/반영/같으면/사/반영/아니/출력/응/괄호/알파/나누기/오/괄호/더하기/이/반영/블록을 나가/아니/종료", "/");
+		
+		CodeCommend02.inputTokenList.add(new StringTokenizer("18", " "));
+		CodeCommend02.inputTokenList.add(new StringTokenizer("4", " "));
+		CodeCommend02.inputTokenList.add(new StringTokenizer("6", " "));
+		CodeCommend02.inputTokenList.add(new StringTokenizer("9", " "));
+		CodeCommend02.inputTokenList.add(new StringTokenizer("11", " "));
 	}
 	
 	private static void setKeyWord(Set<String> keyWordSet) {

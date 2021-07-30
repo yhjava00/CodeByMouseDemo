@@ -8,13 +8,20 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.Stack;
+import java.util.StringTokenizer;
+
+import org.w3c.dom.xpath.XPathEvaluator;
 
 import common.ConnectAI;
 import vo.Morpheme;
 import vo.Variable;
 
 public class CodeCommend02 {
+	
+	public static StringTokenizer commendToken = null;
 
+	public static List<StringTokenizer> inputTokenList = new ArrayList<StringTokenizer>();
+	
 	private static Scanner sc = new Scanner(System.in);
 	
 	public static List<Map<String, Object>> launcherInfoList = new ArrayList<Map<String,Object>>();
@@ -43,7 +50,8 @@ public class CodeCommend02 {
 		while(name==null||variableMap.containsKey(name)) {
 			System.out.println("지니 : 배열의 이름을 정해주세요.");
 			System.out.print("사용자 : ");
-			name = sc.nextLine();
+			name = commendToken.nextToken();
+			
 		}
 		
 		variableMap.put(name, type + "[]");
@@ -51,7 +59,7 @@ public class CodeCommend02 {
 		while(length==-1) {
 			System.out.println("지니 : 배열의 길이를 정해주세요.");
 			System.out.print("사용자 : ");
-			length = convertToNumber(sc.nextLine());
+			length = convertToNumber(commendToken.nextToken());
 		}
 		
 		StringBuilder line = buildLine().append(type).append("[] ").append(name).append(" = ").append(type).append("[").append(length).append("];\n");
@@ -96,10 +104,10 @@ public class CodeCommend02 {
 			line.append(" 키위.nextInt()");
 			break;
 		case "String":
-			line.append(" 키위.sc.nextLine()");
+			line.append(" 키위.commendToken.nextToken()");
 			break;
 		}
-		return "//input";
+		return "input";
 	}
 	
 	private static String scannerInput(String type) {
@@ -107,7 +115,7 @@ public class CodeCommend02 {
 		case "int":
 			return " 키위.nextInt()";
 		case "String":
-			return " 키위.sc.nextLine()";
+			return " 키위.commendToken.nextToken()";
 		}
 		
 		return "키위.next()";
@@ -126,7 +134,7 @@ public class CodeCommend02 {
 		while(!variableMap.containsKey(varToInclude)) {
 			System.out.println("지니 : 연산 결과를 담을 변수를 설정해주세요.");
 			System.out.print("사용자02 : ");
-			varToInclude = sc.nextLine();
+			varToInclude = commendToken.nextToken();
 			launcherInfo.put("var", varToInclude);
 		}
 		
@@ -139,7 +147,7 @@ public class CodeCommend02 {
 			do {
 				System.out.println("지니 : 몇 번째 인덱스에 담으시겠습니까?");
 				System.out.print("사용자02 : ");
-				idx = convertToNumber(sc.nextLine());
+				idx = convertToNumber(commendToken.nextToken());
 			}while(idx==-1);
 			line.append("[").append(idx).append("]");
 		}
@@ -171,7 +179,7 @@ public class CodeCommend02 {
 		
 		System.out.println("지니 : 연산할 값을 말해주세요.");
 		System.out.print("사용자02 : ");
-		calTarget = sc.nextLine();
+		calTarget = commendToken.nextToken();
 		
 		List<Morpheme> morpList = ConnectAI.morphemeSeparation(calTarget);
 		for(int i=0; i<morpList.size(); i++) {
@@ -202,7 +210,7 @@ public class CodeCommend02 {
 			
 			System.out.println("지니 : 어떤 연산을 할까요?");
 			System.out.print("사용자02 : ");
-			List<Morpheme> morpList = ConnectAI.morphemeSeparation(sc.nextLine());
+			List<Morpheme> morpList = ConnectAI.morphemeSeparation(commendToken.nextToken());
 			
 			for(int i=morpList.size()-1; i>=0; i--) {
 				Morpheme morp = morpList.get(i);
@@ -252,7 +260,7 @@ public class CodeCommend02 {
 		do {
 			System.out.println("지니 : 논리연산자를 선택해주세요.");
 			System.out.print("사용자 : ");
-			logicalOperator = sc.nextLine();
+			logicalOperator = commendToken.nextToken();
 		}while(!logicalOperator.equals("또는")&&logicalOperator.equals("그리고"));
 		
 		switch (logicalOperator) {
@@ -287,7 +295,7 @@ public class CodeCommend02 {
 			
 			System.out.println("지니 : 비교 연산자를 설정해주세요.");
 			System.out.print("사용자02 : ");
-			List<Morpheme> morpList = ConnectAI.morphemeSeparation(sc.nextLine());
+			List<Morpheme> morpList = ConnectAI.morphemeSeparation(commendToken.nextToken());
 			
 			for(int i=0; i<morpList.size(); i++) {
 				Morpheme morp = morpList.get(i);
@@ -348,10 +356,10 @@ public class CodeCommend02 {
 		if(type==null) 
 			type = setVariableType("지니 : 변수의 타입을 골라주세요.");
 		
-		if(name==null) {
+		while(name==null||variableMap.containsKey(name)) {
 			System.out.println("지니 : 변수의 이름을 정해주세요.");
 			System.out.print("사용자02 : ");
-			name = sc.nextLine();
+			name = commendToken.nextToken();
 		}
 
 		StringBuilder line = buildLine().append(type).append(name);
@@ -613,7 +621,7 @@ public class CodeCommend02 {
 			System.out.println("지니 : 몇 번 반복할까요?");
 			
 			System.out.print("사용자02 : ");
-			List<Morpheme> morpList = ConnectAI.morphemeSeparation(sc.nextLine());
+			List<Morpheme> morpList = ConnectAI.morphemeSeparation(commendToken.nextToken());
 			
 			find : for(int i=0; i<morpList.size(); i++) {
 				Morpheme morp = morpList.get(i);
@@ -654,15 +662,30 @@ public class CodeCommend02 {
 		repeatRangeNum[0] = convertToNumber(repeatRange[0]);
 		repeatRangeNum[1] = convertToNumber(repeatRange[1]);
 
+		String forVarName = null;
+		
+		while(forVarName==null||variableMap.containsKey(forVarName)) {
+			System.out.println("지니 : 반복무에서 사용할 변수의 이름을 정해주세요.");
+			System.out.print("사용자02 : ");
+			forVarName = commendToken.nextToken();
+		}
+		
 		StringBuilder line = buildLine();
 		
 		if(repeatRangeNum[0]==-1)
-			line.append("for(int 귤=1; 귤<=").append(repeatRangeNum[1]).append("; 귤++) {\n");
+			line.append("for(int ").append(forVarName).append("=1; ").append(forVarName).append("<=").append(repeatRangeNum[1]).append("; ").append(forVarName).append("++) {\\n");
 		else
-			line.append("for(int 귤=").append(repeatRangeNum[0]).append("; 귤<=").append(repeatRangeNum[1]).append("; 귤++) {\n");
+			line.append("for(int ").append(forVarName).append("=").append(repeatRangeNum[0]).append("; ").append(forVarName).append("<=").append(repeatRangeNum[1]).append("; ").append(forVarName).append("++) {\\n");
 		
 		blockStack.add("for");
 		
+		variableMap.put(forVarName, String.valueOf(repeatRangeNum[0]));
+		
+		Map<String, Object> createVarInfo = inputLauncherAction("createVar"); 
+		createVarInfo.put("variable", new Variable("int", forVarName, String.valueOf(repeatRangeNum[0])));
+		
+		launcherInfoList.add(createVarInfo);
+
 		Map<String, Object> launcherInfo = new HashMap<String, Object>();
 		
 		launcherInfo.put("action", "for");
@@ -732,7 +755,7 @@ public class CodeCommend02 {
 				System.out.println("지니 : 어떤 내용을 출력할까요?");
 				
 				System.out.print("사용자02 : ");
-				printValue = sc.nextLine();
+				printValue = commendToken.nextToken();
 			}
 			
 		}

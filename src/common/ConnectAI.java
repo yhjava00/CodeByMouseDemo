@@ -16,6 +16,7 @@ import java.util.Scanner;
 
 import com.google.gson.Gson;
 
+import demo02.CodeCommend02;
 import vo.Dependency;
 import vo.Morpheme;
 
@@ -81,7 +82,7 @@ public class ConnectAI {
         
         Scanner sc = new Scanner(System.in);
         
-        String text = sc.nextLine();
+        String text = CodeCommend02.commendToken.nextToken();
         
         Gson gson = new Gson();
  

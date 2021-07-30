@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import common.ConnectAI;
 import launcher.CodeLauncher;
@@ -34,7 +35,7 @@ public class CodeInWriting02 {
         	
         	System.out.println("지니 : 어떤 작업을 하시겠습니까?");
         	System.out.print("사용자02 : ");
-        	requestText.append(sc.nextLine());
+        	requestText.append(CodeCommend02.commendToken.nextToken());
         	
         	if(requestText.toString().equals("종료")) {
         		StringBuilder finalCode = new StringBuilder();
@@ -46,7 +47,7 @@ public class CodeInWriting02 {
         		System.out.println(finalCode);
         		break;
         	}
-
+        	
         	List<Morpheme> morpList = ConnectAI.morphemeSeparation(requestText.toString());
 
     		codeRepeater(morpList);
@@ -54,10 +55,12 @@ public class CodeInWriting02 {
         
         sc.close();
         
-        System.out.println("Code Result >>");
-		CodeLauncher launcher = new CodeLauncher();
-		launcher.showExecution(CodeCommend02.launcherInfoList);
-		launcher.codeExecution(CodeCommend02.launcherInfoList);
+        for(StringTokenizer inputToken : CodeCommend02.inputTokenList) {
+        	System.out.println("Code Result >>");
+    		CodeLauncher launcher = new CodeLauncher(inputToken);
+    		launcher.showExecution(CodeCommend02.launcherInfoList);
+    		launcher.codeExecution(CodeCommend02.launcherInfoList);
+        }
     }
     
     private static void codeRepeater(List<Morpheme> morpList) {
