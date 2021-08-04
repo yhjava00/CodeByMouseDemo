@@ -10,4 +10,8 @@ public class Variable {
 		this.name = name;
 		this.value = value;
 	}
+	
+	public Variable cloneVar() {
+		return new Variable(type, name, value);
+	}
 }

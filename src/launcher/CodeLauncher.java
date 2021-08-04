@@ -191,7 +191,7 @@ public class CodeLauncher {
 	}
 	
 	private void actionCreateVar(Map<String, Object> info) throws Exception {
-		Variable var = (Variable) info.get("variable");
+		Variable var = ((Variable) info.get("variable")).cloneVar();
 		
 		if(var.value.equals("input")) {
 			var.value = inputToken.nextToken();
@@ -214,12 +214,10 @@ public class CodeLauncher {
 	private void actionPrint(Map<String, Object> info) throws Exception {
 		String value = (String) info.get("value");
 		
-		System.out.println(value);
-		
 		if(info.containsKey("cal")) {
 			value = String.valueOf(engine.eval(putVariable(value)));
 		}
-		
+
 		if(variableMap.containsKey(value)) {
 			System.out.println(variableMap.get(value).value);
 		} else {
