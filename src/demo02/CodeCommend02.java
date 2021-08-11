@@ -38,7 +38,7 @@ public class CodeCommend02 {
 	public static Map<String, String> variableTypeMap = new HashMap<String, String>();
 	
 	public static Set<String> comparisonOperatorSet = new HashSet<String>();
-	
+	// git test
 	public static void codeArrangement(List<StringBuilder> code, StringBuilder originalText, List<Morpheme> originMorpList) {
 		String type = null;
 		String name = null;
